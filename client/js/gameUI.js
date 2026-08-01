@@ -519,7 +519,7 @@ function handleGameOver(data) {
  */
 function enableActions(player) {
   const btns = document.getElementById('action-buttons');
-  btns.style.display = 'flex';
+  btns.style.visibility = 'visible';
 
   const hitBtn = document.getElementById('btn-hit');
   const stayBtn = document.getElementById('btn-stay');
@@ -534,7 +534,7 @@ function enableActions(player) {
  */
 function disableActions() {
   const btns = document.getElementById('action-buttons');
-  btns.style.display = 'none';
+  btns.style.visibility = 'hidden';
 }
 
 /**

@@ -49,25 +49,39 @@ export function createCardElement(card, mini = false) {
 function getNumberSvg(card) {
   const headerBg = getNumberHeaderColor(card.value);
   const cid = card.id || Math.random().toString(36).slice(2);
-  return `
+  
+  // Make the entire card a rich gradient based on the header color
+  // We'll create a slightly darker version of the header color for the bottom stop
+  return \`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="100%" height="100%" style="display:block;">
       <defs>
-        <pattern id="pat-${cid}" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-          <circle cx="2" cy="2" r="1.5" fill="${headerBg}" opacity="0.1" />
+        <linearGradient id="numGrad-\${cid}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="\${headerBg}" />
+          <stop offset="100%" stop-color="#0f172a" />
+        </linearGradient>
+        <pattern id="pat-\${cid}" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <path d="M0,10 L10,0 L20,10 L10,20 Z" fill="#ffffff" opacity="0.05" />
         </pattern>
+        <filter id="glow-\${cid}">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
       </defs>
-      <rect width="200" height="280" fill="#ffffff" />
-      <rect width="200" height="280" fill="url(#pat-${cid})" />
+      <rect width="200" height="280" fill="url(#numGrad-\${cid})" />
+      <rect width="200" height="280" fill="url(#pat-\${cid})" />
       
-      <rect width="200" height="40" fill="${headerBg}" />
-      <text x="100" y="26" font-family="Outfit, sans-serif" font-weight="800" font-size="16" fill="#fff" text-anchor="middle" letter-spacing="2">NUMBER</text>
+      <rect width="200" height="40" fill="rgba(0,0,0,0.4)" />
+      <text x="100" y="26" font-family="Outfit, sans-serif" font-weight="800" font-size="16" fill="#cbd5e1" text-anchor="middle" letter-spacing="3">NUMBER</text>
       
-      <text x="24" y="80" font-family="Outfit, sans-serif" font-weight="900" font-size="32" fill="${headerBg}" text-anchor="middle">${card.value}</text>
-      <text x="176" y="260" font-family="Outfit, sans-serif" font-weight="900" font-size="32" fill="${headerBg}" text-anchor="middle" transform="rotate(180 176 250)">${card.value}</text>
+      <text x="28" y="82" font-family="Outfit, sans-serif" font-weight="900" font-size="34" fill="#ffffff" text-anchor="middle" filter="url(#glow-\${cid})">\${card.value}</text>
+      <text x="172" y="262" font-family="Outfit, sans-serif" font-weight="900" font-size="34" fill="#ffffff" text-anchor="middle" transform="rotate(180 172 250)" filter="url(#glow-\${cid})">\${card.value}</text>
       
-      <text x="100" y="180" font-family="Outfit, sans-serif" font-weight="900" font-size="110" fill="#0f172a" text-anchor="middle">${card.value}</text>
+      <text x="100" y="180" font-family="Outfit, sans-serif" font-weight="900" font-size="120" fill="#ffffff" text-anchor="middle" filter="url(#glow-\${cid})">\${card.value}</text>
     </svg>
-  `;
+  \`;
 }
 
 function getModifierSvg(card) {

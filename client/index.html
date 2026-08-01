@@ -267,9 +267,24 @@
       <div class="center-stage">
         <div class="deck-pile" id="deck-pile">
           <div class="card card-back">
-            <div class="card-back-design">
-              <span class="card-back-logo">F7</span>
-            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="100%" height="100%" style="display:block;">
+              <defs>
+                <linearGradient id="backGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#059669" />
+                  <stop offset="100%" stop-color="#064e3b" />
+                </linearGradient>
+                <pattern id="backPat" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M20,0 L40,20 L20,40 L0,20 Z" fill="none" stroke="#047857" stroke-width="2" />
+                  <circle cx="20" cy="20" r="4" fill="#047857" />
+                </pattern>
+              </defs>
+              <rect width="200" height="280" fill="url(#backGrad)" />
+              <rect width="200" height="280" fill="url(#backPat)" />
+              <rect x="12" y="12" width="176" height="256" fill="none" stroke="#f59e0b" stroke-width="3" rx="8" />
+              <rect x="30" y="90" width="140" height="100" fill="rgba(6, 78, 59, 0.95)" rx="4" />
+              <text x="100" y="135" font-family="Outfit, sans-serif" font-weight="900" font-size="32" fill="#fff" text-anchor="middle" letter-spacing="2">FLIP</text>
+              <text x="100" y="175" font-family="Outfit, sans-serif" font-weight="900" font-size="44" fill="#f59e0b" text-anchor="middle">7</text>
+            </svg>
           </div>
         </div>
         <div class="last-drawn-area" id="last-drawn-area">

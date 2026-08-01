@@ -1,5 +1,5 @@
 /**
- * Card Renderer — creates authentic, crisp, physical card DOM elements.
+ * Card Renderer — creates authentic, crisp, physical card DOM elements using SVG.
  */
 
 const AVATAR_COLORS = [
@@ -11,180 +11,200 @@ const AVATAR_COLORS = [
 function getNumberHeaderColor(value) {
   if (value <= 3) return '#0f766e'; // Teal
   if (value <= 7) return '#1d4ed8'; // Blue
-  return '#4338ca';               // Indigo
+  return '#4338ca';                 // Indigo
 }
 
-/**
- * Create a card DOM element.
- * @param {object} card — card data object
- * @param {boolean} mini — if true, renders a compact mini card for opponents
- * @returns {HTMLElement}
- */
 export function createCardElement(card, mini = false) {
   const el = document.createElement('div');
-
+  
   if (mini) {
-    return createMiniCard(card, el);
+    el.className = 'card-mini';
+    el.dataset.cardId = card.id ?? '';
+    if (card.type === 'number') el.dataset.value = card.value;
+    if (card.type === 'modifier') el.dataset.value = card.label;
+    if (card.type === 'action') el.dataset.action = card.action;
+    el.innerHTML = getMiniSvg(card);
+    return el;
   }
 
   el.className = 'card';
   el.dataset.cardId = card.id ?? '';
 
   if (card.type === 'number') {
-    return createNumberCard(card, el);
+    el.dataset.value = card.value;
+    el.innerHTML = getNumberSvg(card);
   } else if (card.type === 'modifier') {
-    return createModifierCard(card, el);
+    el.dataset.value = card.label;
+    el.innerHTML = getModifierSvg(card);
   } else if (card.type === 'action') {
-    return createActionCard(card, el);
+    el.dataset.action = card.action;
+    el.innerHTML = getActionSvg(card);
+  } else {
+    el.innerHTML = getBackSvg();
   }
 
-  return createCardBackElement(el);
+  return el;
 }
 
-/**
- * Full-size crisp number card.
- */
-function createNumberCard(card, el) {
-  el.classList.add('card-number');
+function getNumberSvg(card) {
   const headerBg = getNumberHeaderColor(card.value);
-
-  el.innerHTML = `
-    <div class="card-header-band" style="background: ${headerBg};">
-      <span class="card-header-title">NUMBER</span>
-      <span class="card-header-val">${card.value}</span>
-    </div>
-    <div class="card-corner card-corner-top">
-      <span class="card-corner-val">${card.value}</span>
-    </div>
-    <div class="card-center">
-      <span class="card-center-val">${card.value}</span>
-    </div>
-    <div class="card-corner card-corner-bottom">
-      <span class="card-corner-val">${card.value}</span>
-    </div>
+  const cid = card.id || Math.random().toString(36).slice(2);
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="100%" height="100%" style="display:block;">
+      <defs>
+        <pattern id="pat-${cid}" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.5" fill="${headerBg}" opacity="0.1" />
+        </pattern>
+      </defs>
+      <rect width="200" height="280" fill="#ffffff" />
+      <rect width="200" height="280" fill="url(#pat-${cid})" />
+      
+      <rect width="200" height="40" fill="${headerBg}" />
+      <text x="100" y="26" font-family="Outfit, sans-serif" font-weight="800" font-size="16" fill="#fff" text-anchor="middle" letter-spacing="2">NUMBER</text>
+      
+      <text x="24" y="80" font-family="Outfit, sans-serif" font-weight="900" font-size="32" fill="${headerBg}" text-anchor="middle">${card.value}</text>
+      <text x="176" y="260" font-family="Outfit, sans-serif" font-weight="900" font-size="32" fill="${headerBg}" text-anchor="middle" transform="rotate(180 176 250)">${card.value}</text>
+      
+      <text x="100" y="180" font-family="Outfit, sans-serif" font-weight="900" font-size="110" fill="#0f172a" text-anchor="middle">${card.value}</text>
+    </svg>
   `;
-
-  el.dataset.value = card.value;
-  return el;
 }
 
-/**
- * Modifier card (+2, +4, +6, +8, +10, x2).
- */
-function createModifierCard(card, el) {
-  el.classList.add('card-modifier');
-
-  el.innerHTML = `
-    <div class="card-header-band mod-header">
-      <span class="card-header-title">MODIFIER</span>
-      <span class="card-header-val">${card.label}</span>
-    </div>
-    <div class="card-corner card-corner-top">
-      <span class="card-corner-val">${card.label}</span>
-    </div>
-    <div class="card-center">
-      <span class="card-center-mod-val">${card.label}</span>
-    </div>
-    <div class="card-corner card-corner-bottom">
-      <span class="card-corner-val">${card.label}</span>
-    </div>
+function getModifierSvg(card) {
+  const cid = card.id || Math.random().toString(36).slice(2);
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="100%" height="100%" style="display:block;">
+      <defs>
+        <linearGradient id="modGrad-${cid}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f59e0b" />
+          <stop offset="100%" stop-color="#d97706" />
+        </linearGradient>
+        <pattern id="modPat-${cid}" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M20,0 L20,40 M0,20 L40,20" stroke="#fff" stroke-width="2" opacity="0.15" />
+        </pattern>
+      </defs>
+      <rect width="200" height="280" fill="url(#modGrad-${cid})" />
+      <rect width="200" height="280" fill="url(#modPat-${cid})" />
+      
+      <rect width="200" height="40" fill="rgba(0,0,0,0.2)" />
+      <text x="100" y="26" font-family="Outfit, sans-serif" font-weight="800" font-size="16" fill="#fff" text-anchor="middle" letter-spacing="2">MODIFIER</text>
+      
+      <text x="28" y="80" font-family="Outfit, sans-serif" font-weight="900" font-size="28" fill="#fff" text-anchor="middle">${card.label}</text>
+      <text x="172" y="260" font-family="Outfit, sans-serif" font-weight="900" font-size="28" fill="#fff" text-anchor="middle" transform="rotate(180 172 250)">${card.label}</text>
+      
+      <text x="100" y="175" font-family="Outfit, sans-serif" font-weight="900" font-size="80" fill="#fff" text-anchor="middle">${card.label}</text>
+    </svg>
   `;
-
-  el.dataset.value = card.label;
-  return el;
 }
 
-/**
- * Action card (Freeze, Flip Three, Second Chance).
- */
-function createActionCard(card, el) {
-  el.classList.add('card-action');
-
+function getActionSvg(card) {
   const descriptions = {
-    freeze: 'Target player must STAY immediately.',
-    flip_three: 'Target player draws 3 cards.',
-    second_chance: 'Saves you from 1 BUST.',
+    freeze: 'Target player\nmust STAY.',
+    flip_three: 'Target player\ndraws 3 cards.',
+    second_chance: 'Saves you\nfrom 1 BUST.',
   };
-  const desc = descriptions[card.action] || '';
-
-  el.innerHTML = `
-    <div class="card-header-band action-header">
-      <span class="card-header-title">ACTION</span>
-    </div>
-    <div class="card-center card-action-center">
-      <span class="card-action-emoji">${card.emoji || '⚡'}</span>
-      <span class="card-action-title">${card.label}</span>
-      <span class="card-action-text">${desc}</span>
-    </div>
+  const descLines = (descriptions[card.action] || '').split('\n');
+  const cid = card.id || Math.random().toString(36).slice(2);
+  
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="100%" height="100%" style="display:block;">
+      <defs>
+        <linearGradient id="actGrad-${cid}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8b5cf6" />
+          <stop offset="100%" stop-color="#6d28d9" />
+        </linearGradient>
+        <pattern id="actPat-${cid}" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="10" height="20" fill="#fff" opacity="0.08" />
+        </pattern>
+      </defs>
+      <rect width="200" height="280" fill="url(#actGrad-${cid})" />
+      <rect width="200" height="280" fill="url(#actPat-${cid})" />
+      
+      <rect width="200" height="40" fill="rgba(0,0,0,0.3)" />
+      <text x="100" y="26" font-family="Outfit, sans-serif" font-weight="800" font-size="16" fill="#fff" text-anchor="middle" letter-spacing="2">ACTION</text>
+      
+      <text x="100" y="130" font-family="Outfit, sans-serif" font-size="64" fill="#fff" text-anchor="middle">${card.emoji || '⚡'}</text>
+      <text x="100" y="180" font-family="Outfit, sans-serif" font-weight="900" font-size="22" fill="#fff" text-anchor="middle" text-transform="uppercase">${card.label}</text>
+      ${descLines.map((line, i) => `<text x="100" y="${210 + (i*16)}" font-family="Inter, sans-serif" font-weight="500" font-size="13" fill="#e9d5ff" text-anchor="middle">${line}</text>`).join('')}
+    </svg>
   `;
-
-  el.dataset.action = card.action;
-  return el;
 }
 
-/**
- * Card back element.
- */
-function createCardBackElement(el) {
-  el.classList.add('card-back');
-  el.innerHTML = `
-    <div class="card-back-pattern">
-      <div class="card-back-frame">
-        <span class="card-back-text">FLIP<br><span style="color: #f59e0b; font-size: 1.3em;">7</span></span>
-      </div>
-    </div>
+function getBackSvg() {
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="100%" height="100%" style="display:block;">
+      <defs>
+        <linearGradient id="backGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#059669" />
+          <stop offset="100%" stop-color="#064e3b" />
+        </linearGradient>
+        <pattern id="backPat" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M20,0 L40,20 L20,40 L0,20 Z" fill="none" stroke="#047857" stroke-width="2" />
+          <circle cx="20" cy="20" r="4" fill="#047857" />
+        </pattern>
+      </defs>
+      <rect width="200" height="280" fill="url(#backGrad)" />
+      <rect width="200" height="280" fill="url(#backPat)" />
+      
+      <rect x="12" y="12" width="176" height="256" fill="none" stroke="#f59e0b" stroke-width="3" rx="8" />
+      <rect x="30" y="90" width="140" height="100" fill="rgba(6, 78, 59, 0.95)" rx="4" />
+      
+      <text x="100" y="135" font-family="Outfit, sans-serif" font-weight="900" font-size="32" fill="#fff" text-anchor="middle" letter-spacing="2">FLIP</text>
+      <text x="100" y="175" font-family="Outfit, sans-serif" font-weight="900" font-size="44" fill="#f59e0b" text-anchor="middle">7</text>
+    </svg>
   `;
-  return el;
 }
 
-/**
- * Mini card for opponent panels — crisp and readable.
- */
-function createMiniCard(card, el) {
-  el.className = 'card-mini';
-  el.dataset.cardId = card.id ?? '';
-
+function getMiniSvg(card) {
   if (card.type === 'number') {
     const headerBg = getNumberHeaderColor(card.value);
-    el.classList.add('mini-number');
-    el.style.borderLeft = `3px solid ${headerBg}`;
-    el.innerHTML = `<span class="mini-val">${card.value}</span>`;
-    el.dataset.value = card.value;
+    return `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 84" width="100%" height="100%" style="display:block;">
+        <rect width="60" height="84" fill="#ffffff" />
+        <rect width="12" height="84" fill="${headerBg}" />
+        <text x="36" y="55" font-family="Outfit, sans-serif" font-weight="900" font-size="32" fill="#0f172a" text-anchor="middle">${card.value}</text>
+      </svg>
+    `;
   } else if (card.type === 'modifier') {
-    el.classList.add('mini-modifier');
-    el.innerHTML = `<span class="mini-val">${card.label}</span>`;
-    el.dataset.value = card.label;
+    return `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 84" width="100%" height="100%" style="display:block;">
+        <rect width="60" height="84" fill="#d97706" />
+        <text x="30" y="52" font-family="Outfit, sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle">${card.label}</text>
+      </svg>
+    `;
   } else if (card.type === 'action') {
-    el.classList.add('mini-action');
-    el.innerHTML = `<span class="mini-val">${card.emoji || '⚡'}</span>`;
-    el.dataset.action = card.action;
+    return `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 84" width="100%" height="100%" style="display:block;">
+        <rect width="60" height="84" fill="#6d28d9" />
+        <text x="30" y="56" font-family="Outfit, sans-serif" font-size="28" fill="#ffffff" text-anchor="middle">${card.emoji || '⚡'}</text>
+      </svg>
+    `;
   }
-
-  return el;
+  
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 84" width="100%" height="100%" style="display:block;">
+      <rect width="60" height="84" fill="#064e3b" />
+      <rect x="6" y="6" width="48" height="72" fill="none" stroke="#f59e0b" stroke-width="2" rx="4" />
+    </svg>
+  `;
 }
 
-/**
- * Create a card-back element (for deck pile).
- */
 export function createCardBack(mini = false) {
   const el = document.createElement('div');
   if (mini) {
-    el.className = 'card-mini mini-back';
+    el.className = 'card-mini';
+    el.innerHTML = getMiniSvg({ type: 'back' });
     return el;
   }
-  return createCardBackElement(el);
+  el.className = 'card card-back';
+  el.innerHTML = getBackSvg();
+  return el;
 }
 
-/**
- * Get a consistent color for a player avatar.
- */
 export function getPlayerColor(index) {
   return AVATAR_COLORS[index % AVATAR_COLORS.length];
 }
 
-/**
- * Create a player avatar element.
- */
 export function createPlayerAvatar(name, index) {
   const el = document.createElement('div');
   el.className = 'player-avatar';

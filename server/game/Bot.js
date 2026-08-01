@@ -184,11 +184,11 @@ export class Bot {
   }
 
   /**
-   * Fast thinking delay (ms) so bots play quickly.
+   * Thinking delay (ms) so bots don't play instantly.
    */
   get thinkingDelay() {
-    const base = 150;
-    const variance = 150;
+    const base = 1500;
+    const variance = 1500;
     return base + Math.floor(Math.random() * variance);
   }
 }

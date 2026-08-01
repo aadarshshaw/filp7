@@ -306,6 +306,7 @@ export class GameEngine {
       if (busted) {
         if (player.useSecondChance()) {
           this.deck.discard(card);
+          player.hand.pop(); // Remove the bursting card from hand
           this.emit('game:secondChanceUsed', {
             playerId: player.id,
             playerName: player.name,

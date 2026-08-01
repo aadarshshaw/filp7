@@ -47,13 +47,10 @@ export class Player {
     return this.hand.length; // hand only contains unique numbers (dupes = bust)
   }
 
-  /**
-   * Attempt to add a number card to the player's hand.
-   * @returns {{ busted: boolean, flip7: boolean }}
-   */
   addNumberCard(card) {
     if (this.hasNumber(card.value)) {
       // ── BUST ──
+      this.hand.push(card); // Let player see the card that busted them
       return { busted: true, flip7: false, card };
     }
 
@@ -96,8 +93,6 @@ export class Player {
 
   bust() {
     this.status = 'busted';
-    this.hand = [];
-    this.modifiers = [];
     this.roundScore = 0;
   }
 

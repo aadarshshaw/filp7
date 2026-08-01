@@ -46,6 +46,10 @@
           <span class="btn-icon">→</span>
           Join Room
         </button>
+        <button id="btn-rules" class="btn btn-ghost">
+          <span class="btn-icon">📖</span>
+          How to Play
+        </button>
       </div>
 
       <div class="landing-footer">
@@ -119,6 +123,45 @@
 
         <button type="submit" class="btn btn-primary btn-full">Join Room</button>
       </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  RULES MODAL                            -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="modal-rules" class="modal-overlay">
+    <div class="modal glass-panel" style="max-width: 600px; padding-bottom: 24px;">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2 class="modal-title">How to Play Flip 7</h2>
+      
+      <div class="rules-content" style="text-align: left; max-height: 60vh; overflow-y: auto; padding-right: 12px; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">The Goal</h3>
+        <p style="margin-bottom: 16px;">Score the most points by drawing cards. Game ends when a player reaches the target score!</p>
+
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Gameplay</h3>
+        <ul style="margin-bottom: 16px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>Hit:</strong> Draw a card from the deck.</li>
+          <li><strong>Stay:</strong> Lock in your current score and wait for the round to end.</li>
+          <li><strong style="color: var(--accent-danger);">Busting:</strong> If you draw a number card that you <strong>already have</strong> in your hand, you BUST! You lose all points for the round and are out until the next round.</li>
+        </ul>
+
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Card Types</h3>
+        <ul style="margin-bottom: 16px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>Number Cards (0-12):</strong> Add their value to your score. The number of cards in the deck equals their value (e.g., there are ten 10s, but only one 1).</li>
+          <li><strong style="color: #d97706;">Modifiers:</strong> (+2, +4, +6, etc. and x2) Special cards that increase your total score. These do not count towards your unique number cards.</li>
+          <li><strong style="color: #6d28d9;">Action Cards:</strong> Special cards that mess with your opponents or save you.</li>
+        </ul>
+
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Special Actions</h3>
+        <ul style="margin-bottom: 16px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>❄️ Freeze:</strong> Force an active opponent to instantly STAY.</li>
+          <li><strong>🃏 Flip Three:</strong> Force an opponent to draw 3 times on their turn.</li>
+          <li><strong>🔄 Second Chance:</strong> Automatically saves you from busting once.</li>
+        </ul>
+
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">The Flip 7 Bonus</h3>
+        <p>If you manage to collect <strong>7 unique number cards</strong> without busting, the round instantly ends and you receive a <strong>15 point bonus</strong> on top of your hand score!</p>
+      </div>
     </div>
   </div>
 

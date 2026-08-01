@@ -38,6 +38,13 @@ function bindLandingPage() {
   document.getElementById('btn-join-room').addEventListener('click', () => {
     openModal('modal-join');
   });
+
+  const btnRules = document.getElementById('btn-rules');
+  if (btnRules) {
+    btnRules.addEventListener('click', () => {
+      openModal('modal-rules');
+    });
+  }
 }
 
 // ═══════════════════════════════════════════

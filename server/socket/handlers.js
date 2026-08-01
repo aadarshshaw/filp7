@@ -33,10 +33,14 @@ export function registerHandlers(io) {
     });
 
     socket.on('room:join', (data) => {
-      const { playerName, roomCode } = data;
-      const code = roomCode.toUpperCase();
+      const { playerName, code: joinCode, roomCode } = data;
+      const codeToUse = (joinCode || roomCode || '').toUpperCase();
 
-      const room = roomManager.getRoom(code);
+      if (!codeToUse) {
+        return socket.emit('error', { message: 'Invalid room code' });
+      }
+
+      const room = roomManager.getRoom(codeToUse);
       if (!room) {
         return socket.emit('error', { message: 'Room not found' });
       }
@@ -47,13 +51,13 @@ export function registerHandlers(io) {
       }
 
       socket.playerName = playerName;
-      socket.roomCode = code;
-      socket.join(code);
+      socket.roomCode = codeToUse;
+      socket.join(codeToUse);
 
-      console.log(`[Room] ${playerName} joined ${code}`);
+      console.log(`[Room] ${playerName} joined ${codeToUse}`);
 
-      io.to(code).emit('room:playerList', room.getPlayerList());
-      io.to(code).emit('chat:message', {
+      io.to(codeToUse).emit('room:playerList', room.getPlayerList());
+      io.to(codeToUse).emit('chat:message', {
         id: Date.now().toString(36),
         senderName: 'System',
         text: `${playerName} joined the room!`,

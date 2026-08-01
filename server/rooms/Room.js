@@ -1,0 +1,184 @@
+import { GameEngine } from '../game/GameEngine.js';
+
+/**
+ * Represents a single game room / lobby.
+ */
+export class Room {
+  /**
+   * @param {string} code     — unique room code
+   * @param {string} hostId   — socket id of the host
+   * @param {object} settings — room configuration
+   */
+  constructor(code, hostId, settings = {}) {
+    this.code = code;
+    this.hostId = hostId;
+    this.createdAt = Date.now();
+    this.lastActivity = Date.now();
+
+    // Settings
+    this.settings = {
+      targetScore: settings.targetScore || 200,
+      turnTimer: settings.turnTimer || 30,
+      maxPlayers: Math.min(18, Math.max(3, settings.maxPlayers || 8)),
+    };
+
+    // Players in lobby (before game starts)
+    // Map of socketId → { id, name, isHost }
+    this.lobbyPlayers = new Map();
+
+    // Game engine (created when game starts)
+    this.engine = null;
+
+    // Room status
+    this.status = 'waiting'; // 'waiting' | 'playing' | 'finished'
+
+    // Chat history (last 100 messages)
+    this.chatHistory = [];
+  }
+
+  // ─────────────────────────────────────────
+  //  LOBBY MANAGEMENT
+  // ─────────────────────────────────────────
+
+  /** Add a player to the lobby. */
+  addPlayer(socketId, name) {
+    if (this.lobbyPlayers.size >= this.settings.maxPlayers) {
+      return { error: 'Room is full' };
+    }
+    if (this.status === 'playing') {
+      return { error: 'Game already in progress' };
+    }
+
+    this.lobbyPlayers.set(socketId, {
+      id: socketId,
+      name: name,
+      isHost: socketId === this.hostId,
+    });
+    this.touch();
+    return { success: true };
+  }
+
+  /** Remove a player from the lobby or game. */
+  removePlayer(socketId) {
+    this.lobbyPlayers.delete(socketId);
+
+    // If game is running, remove from engine too
+    if (this.engine) {
+      this.engine.removePlayer(socketId);
+    }
+
+    // Promote new host if the host left
+    if (socketId === this.hostId && this.lobbyPlayers.size > 0) {
+      const newHostId = this.lobbyPlayers.keys().next().value;
+      this.hostId = newHostId;
+      const newHost = this.lobbyPlayers.get(newHostId);
+      if (newHost) newHost.isHost = true;
+      return { newHostId };
+    }
+
+    this.touch();
+    return { newHostId: null };
+  }
+
+  /** Get the player list for broadcasting. */
+  getPlayerList() {
+    return Array.from(this.lobbyPlayers.values());
+  }
+
+  /** Check if a player is in this room. */
+  hasPlayer(socketId) {
+    return this.lobbyPlayers.has(socketId);
+  }
+
+  /** Player count (lobby). */
+  get playerCount() {
+    return this.lobbyPlayers.size;
+  }
+
+  /** Is the room empty? */
+  get isEmpty() {
+    return this.lobbyPlayers.size === 0;
+  }
+
+  /** Can the game start? (at least 1 human, bots fill to 3). */
+  canStart() {
+    return this.lobbyPlayers.size >= 1 && this.status === 'waiting';
+  }
+
+  // ─────────────────────────────────────────
+  //  GAME LIFECYCLE
+  // ─────────────────────────────────────────
+
+  /** Start the game: create engine, add all lobby players, begin. */
+  startGame(emitFn) {
+    this.engine = new GameEngine(this.settings, emitFn);
+
+    // Add all lobby players to the engine
+    for (const [socketId, info] of this.lobbyPlayers) {
+      this.engine.addPlayer(socketId, info.name);
+    }
+
+    this.status = 'playing';
+    this.touch();
+
+    return this.engine.startGame();
+  }
+
+  /** Proceed to the next round. */
+  nextRound() {
+    if (!this.engine) return;
+    if (this.engine.isGameOver()) {
+      this.status = 'finished';
+      return null;
+    }
+    return this.engine.nextRound();
+  }
+
+  /** Reset the room for a new game. */
+  resetGame() {
+    this.engine = null;
+    this.status = 'waiting';
+    this.touch();
+  }
+
+  // ─────────────────────────────────────────
+  //  CHAT
+  // ─────────────────────────────────────────
+
+  addChatMessage(socketId, name, text) {
+    const msg = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      senderId: socketId,
+      senderName: name,
+      text: text.slice(0, 200), // limit length
+      timestamp: Date.now(),
+    };
+    this.chatHistory.push(msg);
+    if (this.chatHistory.length > 100) {
+      this.chatHistory.shift();
+    }
+    this.touch();
+    return msg;
+  }
+
+  // ─────────────────────────────────────────
+  //  UTILITY
+  // ─────────────────────────────────────────
+
+  touch() {
+    this.lastActivity = Date.now();
+  }
+
+  /** Serialize for clients. */
+  toJSON() {
+    return {
+      code: this.code,
+      hostId: this.hostId,
+      status: this.status,
+      settings: this.settings,
+      players: this.getPlayerList(),
+      playerCount: this.playerCount,
+      gameState: this.engine ? this.engine.getState() : null,
+    };
+  }
+}

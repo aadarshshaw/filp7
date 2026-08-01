@@ -1,0 +1,14 @@
+{
+  "name": "flip7",
+  "version": "1.0.0",
+  "description": "Flip 7 — Online Multiplayer Card Game",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.js",
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "socket.io": "^4.7.5"
+  }
+}

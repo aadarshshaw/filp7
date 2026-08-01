@@ -547,6 +547,12 @@ function startTurnTimer(duration) {
   bar.classList.add('timer-active');
   bar.style.setProperty('--timer-duration', `${duration}s`);
 
+  const countEl = document.getElementById('turn-timer-count');
+  if (countEl) {
+    countEl.style.display = 'inline-block';
+    countEl.textContent = `(${duration}s)`;
+  }
+
   // Force reflow
   bar.offsetHeight;
 
@@ -555,6 +561,7 @@ function startTurnTimer(duration) {
   let remaining = duration;
   timerInterval = setInterval(() => {
     remaining--;
+    if (countEl) countEl.textContent = `(${remaining}s)`;
     if (remaining <= 0) {
       clearTurnTimer();
     }
@@ -571,6 +578,9 @@ function clearTurnTimer() {
   }
   const bar = document.getElementById('turn-timer-bar');
   if (bar) bar.classList.remove('timer-active');
+  
+  const countEl = document.getElementById('turn-timer-count');
+  if (countEl) countEl.style.display = 'none';
 }
 
 /**

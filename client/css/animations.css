@@ -86,15 +86,15 @@
 @keyframes cardDeal {
   0% {
     opacity: 0;
-    transform: translate(-50%, -100px) scale(0.5) rotateY(180deg);
+    transform: translate(-80px, -150px) scale(0.3) rotateX(60deg) rotateY(180deg);
   }
-  60% {
+  50% {
     opacity: 1;
-    transform: translate(0, 0) scale(1.05) rotateY(90deg);
+    transform: translate(0, 0) scale(1.15) rotateX(0deg) rotateY(90deg);
   }
   100% {
     opacity: 1;
-    transform: translate(0, 0) scale(1) rotateY(0deg);
+    transform: translate(0, 0) scale(1) rotateX(0deg) rotateY(0deg);
   }
 }
 

@@ -329,6 +329,7 @@ export class GameEngine {
     if (card.type === CardType.ACTION) {
       if (card.action === ActionName.SECOND_CHANCE) {
         const result = ActionResolver.resolve(card, player, null, this);
+        player.addModifier(card); // Keep in hand visually
         this.emitActionEvents(result.events);
         return { busted: false, flip7: false, action: true, card };
       }

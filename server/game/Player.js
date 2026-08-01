@@ -78,6 +78,11 @@ export class Player {
   useSecondChance() {
     if (this.hasSecondChance) {
       this.hasSecondChance = false;
+      // Remove it from modifiers so it disappears visually when used
+      const idx = this.modifiers.findIndex(m => m.action === 'second_chance');
+      if (idx !== -1) {
+        this.modifiers.splice(idx, 1);
+      }
       return true;
     }
     return false;

@@ -10,13 +10,13 @@
 
 .game-container {
   display: grid;
-  grid-template-rows: auto 1fr auto auto auto;
+  grid-template-rows: auto auto 1fr auto auto auto;
   min-height: 100vh;
   max-width: 1300px;
   margin: 0 auto;
   width: 100%;
-  padding: var(--space-md);
-  gap: var(--space-md);
+  padding: var(--space-xl);
+  gap: var(--space-xl);
 }
 
 /* ── Top Bar ── */

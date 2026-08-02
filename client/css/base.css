@@ -266,6 +266,7 @@ a {
   margin-top: var(--space-md);
   max-height: 250px;
   overflow-y: auto;
+  padding: 8px 4px; /* Prevent clipping of hover shadows */
 }
 .target-btn {
   display: flex;

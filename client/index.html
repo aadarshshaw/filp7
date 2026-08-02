@@ -250,20 +250,21 @@
   <!-- ═══════════════════════════════════════ -->
   <section id="game-screen" class="screen">
     <div class="game-container">
-      <!-- Top Bar -->
+      <!-- Top Bar: Single line banner -->
       <div class="game-topbar">
         <div class="game-round-info">
           <span class="round-label">Round</span>
           <span class="round-number" id="game-round-number">1</span>
         </div>
+        <div class="topbar-divider">|</div>
         <div class="game-target-info">
-          Target: <span id="game-target-score">200</span> pts
+          Goal: <span class="highlight-number" id="game-target-score">200</span>
         </div>
+        <div class="topbar-divider">|</div>
         <div class="deck-info">
-          <span class="deck-icon">🂠</span>
-          <span id="game-deck-remaining">94</span> left
+          Deck: <span class="highlight-number" id="game-deck-remaining">94</span>
         </div>
-        <button id="btn-toggle-scoreboard" class="btn btn-ghost btn-sm">🏆</button>
+        <button id="btn-toggle-scoreboard" class="btn btn-ghost btn-sm" title="Scoreboard">🏆</button>
       </div>
 
       <!-- Scoreboard Sidebar -->
@@ -308,9 +309,25 @@
         </div>
       </div>
 
+      <!-- Action Buttons & Turn Indicator -->
+      <div class="action-bar" id="action-bar">
+        <div class="turn-indicator" id="turn-indicator">
+          <span class="turn-text" id="turn-text">Waiting...</span>
+          <span class="turn-timer-count" id="turn-timer-count" style="display:none;"></span>
+          <div class="turn-timer-bar" id="turn-timer-bar"></div>
+        </div>
+        <div class="action-buttons" id="action-buttons" style="visibility: hidden;">
+          <button id="btn-hit" class="btn btn-hit btn-glow">
+            <span class="btn-label">HIT</span>
+          </button>
+          <button id="btn-stay" class="btn btn-stay btn-outline">
+            <span class="btn-label">Stay</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Current Player's Hand -->
       <div class="player-hand-area">
-        <div class="hand-label">Your Hand &nbsp;•&nbsp; 0 Cards &nbsp;•&nbsp; 0/7 Unique for Flip 7</div>
         <div class="hand-row">
           <div class="player-hand" id="player-hand">
             <!-- dynamically populated -->
@@ -319,35 +336,26 @@
             <!-- modifier cards -->
           </div>
         </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="action-bar" id="action-bar">
-        <div class="turn-indicator" id="turn-indicator">
-          <span class="turn-text" id="turn-text">Waiting...</span>
-          <span class="turn-timer-count" id="turn-timer-count" style="display:none; margin-left: 8px; font-weight: bold; color: var(--accent-gold);"></span>
-          <div class="turn-timer-bar" id="turn-timer-bar"></div>
+        
+        <!-- Player Status Bar (Stats) -->
+        <div class="player-stats-bottom" id="player-status-bar">
+          <div class="stat-block">
+            <span class="stat-label">SCORE</span>
+            <span class="stat-value highlight-number" id="status-round-score">0</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-block">
+            <span class="stat-label">UNIQUE</span>
+            <span class="stat-value" id="status-unique-count">0/7</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-block">
+            <span class="stat-label">TOTAL</span>
+            <span class="stat-value accent-color" id="status-total-score">0</span>
+          </div>
         </div>
-        <div class="action-buttons" id="action-buttons" style="visibility: hidden;">
-          <button id="btn-hit" class="btn btn-hit btn-glow">
-            <span class="btn-label">HIT</span>
-            <span class="btn-sub">Draw a card</span>
-          </button>
-          <button id="btn-stay" class="btn btn-stay">
-            <span class="btn-label">STAY</span>
-            <span class="btn-sub">Lock in score</span>
-          </button>
-        </div>
       </div>
-
-      <!-- Player Status Bar -->
-      <div class="player-status-bar" id="player-status-bar">
-        <div class="status-name" id="status-name">You</div>
-        <div class="status-score">
-          Round: <span id="status-round-score">0</span> | Total: <span id="status-total-score">0</span>
-        </div>
-        <div class="status-indicator" id="status-indicator">Active</div>
-      </div>
+      
     </div>
 
     <!-- Action Card Target Modal -->

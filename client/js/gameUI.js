@@ -217,46 +217,55 @@ function renderOpponents(opponents, currentPlayerId) {
   opponents.forEach((opp, index) => {
     const panel = document.createElement('div');
     panel.className = 'opponent-panel';
-    if (opp.id === currentPlayerId) panel.classList.add('active-turn', 'active-turn-pulse');
+    if (opp.id === currentPlayerId) panel.classList.add('active-turn');
     if (opp.status === 'busted') panel.classList.add('busted');
     if (opp.status === 'stayed') panel.classList.add('stayed');
-
-    // Status badge
-    let statusClass = 'status-active';
-    let statusText = 'Active';
-    if (opp.status === 'busted') { statusClass = 'status-busted'; statusText = 'Busted'; }
-    if (opp.status === 'stayed') { statusClass = 'status-stayed'; statusText = 'Stayed'; }
-    if (opp.status === 'frozen') { statusClass = 'status-frozen'; statusText = 'Frozen'; }
-    if (opp.isOffline) { statusClass = 'status-offline'; statusText = 'Offline'; }
 
     // Calculate running hand score
     const handScore = opp.hand.reduce((s, c) => s + c.value, 0);
     const modScore = opp.modifiers.reduce((s, c) => s + (c.value || 0), 0);
+    const totalCurrentScore = handScore + modScore;
+    const cardsCount = opp.hand.length + opp.modifiers.length;
 
     const avatarColor = getPlayerColor(index);
+    let stateIcon = '';
+    if (opp.status === 'busted') stateIcon = '💥';
+    if (opp.status === 'stayed') stateIcon = '🔒';
+    if (opp.isOffline) stateIcon = '🔌';
 
-    // Build the panel header + score
     panel.innerHTML = `
       <div class="opponent-header">
-        <div class="player-avatar" style="background: ${avatarColor}; width: 28px; height: 28px; font-size: 0.7rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #06091a; font-weight: 700;">
+        <div class="opponent-avatar" style="background: ${avatarColor};" title="${escapeHtml(opp.name)}">
           ${opp.name.slice(0, 2).toUpperCase()}
         </div>
         <span class="opponent-name">${escapeHtml(opp.name)}</span>
-        <span class="opponent-status ${statusClass}">${statusText}</span>
+        <span class="opponent-state-icon">${stateIcon}</span>
+      </div>
+      <div class="opponent-stats-grid">
+        <div class="opponent-stat">
+          <span class="opponent-stat-label">Score</span>
+          <span class="opponent-stat-value">${totalCurrentScore}</span>
+        </div>
+        <div class="opponent-stat">
+          <span class="opponent-stat-label">Cards</span>
+          <span class="opponent-stat-value">${cardsCount}</span>
+        </div>
       </div>
       <div class="opponent-cards"></div>
-      <div class="opponent-score">
-        Hand: ${handScore}${modScore > 0 ? '+' + modScore : ''} | Total: <span class="opponent-total">${opp.totalScore}</span>
-      </div>
     `;
 
-    // Add mini cards using the renderer
     const cardsContainer = panel.querySelector('.opponent-cards');
-    opp.hand.forEach(c => {
-      cardsContainer.appendChild(createCardElement(c, true));
+    
+    opp.hand.forEach(card => {
+      const cardEl = createCardElement(card, true);
+      cardEl.className = 'card-sm'; // Ensure they get the small card styling
+      cardsContainer.appendChild(cardEl);
     });
-    opp.modifiers.forEach(c => {
-      cardsContainer.appendChild(createCardElement(c, true));
+
+    opp.modifiers.forEach(card => {
+      const cardEl = createCardElement(card, true);
+      cardEl.className = 'card-sm';
+      cardsContainer.appendChild(cardEl);
     });
 
     area.appendChild(panel);
@@ -299,19 +308,19 @@ function renderScoreboard(players, targetScore) {
  */
 function updateStatusBar(player) {
   if (!player) return;
-  document.getElementById('status-name').textContent = player.name;
   
-  const statusScore = document.querySelector('.status-score');
-  if (statusScore) {
-    const cardCount = (player.hand ? player.hand.length : 0) + (player.modifiers ? player.modifiers.length : 0);
-    const uniqueCount = player.uniqueNumberCount || 0;
-    statusScore.innerHTML = `🎴 <b>${cardCount} Cards</b> (${uniqueCount}/7 Unique) &nbsp;|&nbsp; Round: <span id="status-round-score">${player.roundScore || 0}</span> &nbsp;|&nbsp; Total: <span id="status-total-score">${player.totalScore}</span>`;
+  const elRoundScore = document.getElementById('status-round-score');
+  const elUnique = document.getElementById('status-unique-count');
+  const elTotal = document.getElementById('status-total-score');
+  
+  if (elRoundScore) {
+    elRoundScore.textContent = player.roundScore || 0;
   }
-
-  const indicator = document.getElementById('status-indicator');
-  if (indicator) {
-    indicator.className = 'status-indicator ' + player.status;
-    indicator.textContent = player.status.charAt(0).toUpperCase() + player.status.slice(1);
+  if (elUnique) {
+    elUnique.textContent = `${player.uniqueNumberCount || 0}/7`;
+  }
+  if (elTotal) {
+    elTotal.textContent = player.totalScore || 0;
   }
 }
 
@@ -334,7 +343,7 @@ function updateTurnIndicator(state) {
   }
 
   if (state.currentPlayerId === myPlayerId) {
-    turnText.textContent = '🎯 Your Turn!';
+    turnText.textContent = '★ YOUR TURN ★';
     turnText.className = 'turn-text your-turn';
   } else {
     const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
@@ -546,24 +555,23 @@ function startTurnTimer(duration) {
   clearTurnTimer();
 
   const bar = document.getElementById('turn-timer-bar');
-  bar.classList.add('timer-active');
-  bar.style.setProperty('--timer-duration', `${duration}s`);
+  if (bar) {
+    bar.classList.add('timer-active');
+    bar.style.setProperty('--timer-duration', `${duration}s`);
+    // Force reflow
+    bar.offsetHeight;
+  }
 
   const countEl = document.getElementById('turn-timer-count');
   if (countEl) {
     countEl.style.display = 'inline-block';
-    countEl.textContent = `(${duration}s)`;
+    countEl.textContent = ` • ${duration}s`;
   }
-
-  // Force reflow
-  bar.offsetHeight;
-
-  bar.querySelector?.(':after')?.style?.transitionDuration;
 
   let remaining = duration;
   timerInterval = setInterval(() => {
     remaining--;
-    if (countEl) countEl.textContent = `(${remaining}s)`;
+    if (countEl) countEl.textContent = ` • ${remaining}s`;
     if (remaining <= 0) {
       clearTurnTimer();
     }

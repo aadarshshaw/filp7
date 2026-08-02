@@ -432,8 +432,12 @@ export class GameEngine {
 
   /** Round is over when every player has busted or stayed. */
   isRoundOver() {
-    return this.players.length > 0 &&
-           this.players.every(p => p.hasBusted || p.hasStayed);
+    if (this.players.length === 0) return false;
+
+    const anyFlip7 = this.players.some(p => p.uniqueNumberCount >= 7);
+    const allStayedOrBusted = this.players.every(p => p.hasBusted || p.hasStayed);
+
+    return anyFlip7 || allStayedOrBusted;
   }
 
   endRound() {

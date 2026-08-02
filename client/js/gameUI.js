@@ -11,6 +11,7 @@ let currentState = null;
 let myPlayerId = null;
 let timerInterval = null;
 let timerDuration = 30;
+let previousMeStatus = null;
 
 /**
  * Initialize the Game UI module.
@@ -229,6 +230,10 @@ function renderMyHand(player) {
       overlay.className = 'state-overlay bust-overlay';
       overlay.textContent = '💥 BUSTED';
       myPanel.appendChild(overlay);
+      
+      if (previousMeStatus !== 'busted') {
+        showSplash('💥 BUSTED!', 'var(--accent-danger)');
+      }
     } else if (player.status === 'stayed') {
       myPanel.classList.add('stayed');
       const overlay = document.createElement('div');
@@ -243,6 +248,7 @@ function renderMyHand(player) {
       overlay.textContent = '❄️ FROZEN';
       myPanel.appendChild(overlay);
     }
+    previousMeStatus = player.status;
   }
 
   // Apply fan rotation to cards

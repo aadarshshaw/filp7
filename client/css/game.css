@@ -138,6 +138,17 @@
   border-radius: 2px;
   margin-top: 4px;
 }
+
+@media (min-width: 1400px) {
+  .scoreboard-panel {
+    right: var(--space-md) !important;
+    opacity: 0.8;
+  }
+  .scoreboard-panel:hover {
+    opacity: 1;
+  }
+}
+
 .scoreboard-bar-fill {
   height: 100%;
   border-radius: 2px;
@@ -150,12 +161,15 @@
   display: flex;
   justify-content: center;
   gap: var(--space-sm);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   flex-shrink: 0;
+  align-items: flex-start;
 }
 
 .opponent-panel {
-  width: 150px;
+  flex: 1 1 0;
+  min-width: 65px;
+  max-width: 140px;
   display: flex;
   flex-direction: column;
   padding: 12px;
@@ -226,19 +240,20 @@
 }
 
 .opponent-stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 12px;
 }
 .opponent-stat {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   background: rgba(0,0,0,0.25);
   border-radius: 6px;
-  padding: 6px 4px;
+  padding: 4px 6px;
 }
 .opponent-stat-label {
   font-size: 0.6rem;
@@ -312,12 +327,12 @@
   z-index: 50;
 }
 .opponent-cards:hover .card-sm {
-  margin-left: -5px; /* Spread out */
-  transform: translateY(-20px) scale(1.8);
+  margin-left: 10px; /* Spread out widely to see all cards */
+  transform: translateY(-40px) scale(2);
   box-shadow: 0 10px 25px rgba(0,0,0,0.8);
 }
 .opponent-cards:hover .card-sm:hover {
-  transform: translateY(-30px) scale(2.2);
+  transform: translateY(-50px) scale(2.5);
   z-index: 100;
 }
 .card-sm:first-child {

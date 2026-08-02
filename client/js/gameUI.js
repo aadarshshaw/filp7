@@ -216,10 +216,22 @@ function renderMyHand(player) {
     roundScoreEl.innerText = totalCurrentScore;
   }
 
+  // Create hand cards
   player.hand.forEach(card => {
     const cardEl = createCardElement(card, false);
     handEl.appendChild(cardEl);
   });
+
+  // Apply fan rotation to cards
+  const cards = handEl.querySelectorAll('.card');
+  const numCards = cards.length;
+  if (numCards > 1) {
+    const maxAngle = Math.min(numCards * 3, 18); // Max spread of 18 degrees
+    cards.forEach((cardEl, i) => {
+      const angle = -maxAngle / 2 + (maxAngle / (numCards - 1)) * i;
+      cardEl.style.transform = `rotate(${angle}deg)`;
+    });
+  }
 
   player.modifiers.forEach(card => {
     const cardEl = createCardElement(card, false);
@@ -228,35 +240,15 @@ function renderMyHand(player) {
 }
 
 /**
- * Render opponent panels in a circular arc layout.
+ * Render opponent panels.
  */
 function renderOpponents(opponents, currentPlayerId) {
   const area = document.getElementById('opponents-area');
   area.innerHTML = '';
 
-  const totalOpponents = opponents.length;
-  const startAngle = Math.PI * 0.85; // 153 degrees (left)
-  const endAngle = Math.PI * 0.15;   // 27 degrees (right)
-  
-  let angleStep = 0;
-  if (totalOpponents > 1) {
-    angleStep = (startAngle - endAngle) / (totalOpponents - 1);
-  }
-
   opponents.forEach((opp, index) => {
     const panel = document.createElement('div');
     panel.className = 'opponent-panel';
-    
-    // Position circularly
-    const angle = totalOpponents === 1 ? Math.PI / 2 : startAngle - (index * angleStep);
-    const rx = 42; // Horizontal radius %
-    const ry = 38; // Vertical radius %
-    
-    const x = 50 + Math.cos(angle) * rx;
-    const y = 48 - Math.sin(angle) * ry;
-    
-    panel.style.left = `calc(${x}% - 75px)`;
-    panel.style.top = `calc(${y}% - 70px)`;
 
     if (opp.id === currentPlayerId) panel.classList.add('active-turn');
     if (opp.status === 'busted') panel.classList.add('busted');
@@ -384,7 +376,7 @@ function updateTurnIndicator(state) {
   }
 
   if (state.currentPlayerId === myPlayerId) {
-    turnText.innerHTML = '★ YOUR TURN ★<br><span style="font-size:0.8rem; opacity:0.8; font-weight:500;">What do you do?</span>';
+    turnText.textContent = '★ YOUR TURN ★';
     turnText.className = 'turn-text your-turn';
   } else {
     const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);

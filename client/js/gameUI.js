@@ -176,6 +176,19 @@ function renderState(state) {
 
   // Update turn indicator
   updateTurnIndicator(state);
+
+  // Restore game over screen if reloading during game over
+  if (state.phase === 'gameOver') {
+    const overlay = document.getElementById('game-over-overlay');
+    if (overlay.style.display !== 'flex') {
+      const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
+      handleGameOver({
+        winnerId: sorted[0]?.id,
+        winnerName: sorted[0]?.name,
+        finalScores: sorted
+      });
+    }
+  }
 }
 
 /**

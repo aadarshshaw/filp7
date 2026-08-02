@@ -87,9 +87,6 @@ function bindModals() {
   document.getElementById('create-max').addEventListener('input', (e) => {
     document.getElementById('max-value').textContent = e.target.value;
   });
-  document.getElementById('create-bots').addEventListener('input', (e) => {
-    document.getElementById('bots-value').textContent = e.target.value;
-  });
 
   createForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -104,11 +101,10 @@ function bindModals() {
     );
     const turnTimer = parseInt(document.getElementById('create-timer').value);
     const maxPlayers = parseInt(document.getElementById('create-max').value);
-    const initialBots = parseInt(document.getElementById('create-bots').value);
 
     socketManager.emit('room:create', {
       playerName: name,
-      settings: { targetScore, turnTimer, maxPlayers, initialBots },
+      settings: { targetScore, turnTimer, maxPlayers },
     });
 
     closeModal('modal-create');
@@ -180,6 +176,14 @@ function bindLobby() {
     });
   });
 
+  // Bot controls
+  document.getElementById('btn-add-bot').addEventListener('click', () => {
+    socketManager.emit('room:addBot');
+  });
+  document.getElementById('btn-remove-bot').addEventListener('click', () => {
+    socketManager.emit('room:removeBot');
+  });
+
   // Start game button
   document.getElementById('btn-start-game').addEventListener('click', () => {
     socketManager.emit('game:start');
@@ -203,6 +207,18 @@ function updateLobby(room) {
 
   // Start button
   updateStartButton(room);
+
+  // Bot controls
+  const botControls = document.getElementById('bot-controls');
+  if (botControls) {
+    if (room.hostId === socketManager.playerId) {
+      botControls.style.display = 'flex';
+      // Disable add bot if full
+      document.getElementById('btn-add-bot').disabled = room.players.length >= room.settings.maxPlayers;
+    } else {
+      botControls.style.display = 'none';
+    }
+  }
 }
 
 function updatePlayerList(players) {
@@ -225,6 +241,14 @@ function updatePlayerList(players) {
       const badge = document.createElement('span');
       badge.className = 'player-badge badge-host';
       badge.textContent = '👑 Host';
+      li.appendChild(badge);
+    }
+    
+    if (p.isBot) {
+      const badge = document.createElement('span');
+      badge.className = 'player-badge badge-host';
+      badge.style.background = '#6366f1';
+      badge.textContent = '🤖 Bot';
       li.appendChild(badge);
     }
 
@@ -250,20 +274,17 @@ function updatePlayerList(players) {
 function updateStartButton(room) {
   const btn = document.getElementById('btn-start-game');
   const isHost = room.hostId === socketManager.playerId;
-  const hasPlayers = room.players.length >= 1; // bots fill to 3
+  const hasMinPlayers = room.players.length >= 3;
 
   if (!isHost) {
     btn.disabled = true;
     btn.textContent = 'Waiting for host to start...';
-  } else if (!hasPlayers) {
+  } else if (!hasMinPlayers) {
     btn.disabled = true;
-    btn.textContent = 'Waiting for players...';
+    btn.textContent = 'Need at least 3 players (add bots)';
   } else {
     btn.disabled = false;
-    const botCount = Math.max(0, 3 - room.players.length);
-    btn.textContent = botCount > 0
-      ? `Start Game (${botCount} bot${botCount > 1 ? 's' : ''} will join)`
-      : 'Start Game';
+    btn.textContent = 'Start Game';
   }
 }
 

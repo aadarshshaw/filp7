@@ -30,6 +30,9 @@ test('basic gameplay loop', async ({ browser }) => {
   await expect(page1.locator('#lobby-player-list')).toContainText('PlayerTwo');
   await expect(page2.locator('#lobby-player-list')).toContainText('PlayerOne');
 
+  // Add a bot to reach 3 players
+  await page1.click('#btn-add-bot');
+
   // Player 1 starts the game
   await page1.click('#btn-start-game');
 

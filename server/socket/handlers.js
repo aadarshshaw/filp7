@@ -95,6 +95,22 @@ export function registerHandlers(io) {
       }
     });
 
+    socket.on('room:addBot', () => {
+      const room = roomManager.getRoom(socket.roomCode);
+      if (!room || room.hostId !== socket.playerId) return;
+      if (room.addBot()) {
+        io.to(room.code).emit('room:playerList', room.getPlayerList());
+      }
+    });
+
+    socket.on('room:removeBot', () => {
+      const room = roomManager.getRoom(socket.roomCode);
+      if (!room || room.hostId !== socket.playerId) return;
+      if (room.removeBot()) {
+        io.to(room.code).emit('room:playerList', room.getPlayerList());
+      }
+    });
+
     socket.on('room:leave', () => {
       leaveCurrentRoom(socket, io, true); // true = force remove
     });

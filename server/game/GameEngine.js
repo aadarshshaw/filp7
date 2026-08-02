@@ -55,6 +55,17 @@ export class GameEngine {
     }
   }
 
+  addSpecificBot(id, name) {
+    if (this.players.find(p => p.id === id)) return;
+    const bot = new Bot();
+    bot.id = id;
+    bot.name = name;
+    const player = new Player(id, name, true);
+    this.players.push(player);
+    this.bots.set(id, bot);
+    return player;
+  }
+
   removePlayer(id) {
     const idx = this.players.findIndex(p => p.id === id);
     if (idx === -1) return;
@@ -97,16 +108,6 @@ export class GameEngine {
   // ═══════════════════════════════════════════
 
   startGame() {
-    if (this.settings && this.settings.initialBots !== undefined) {
-      if (this.settings.initialBots > 0) {
-        this.addBots(this.settings.initialBots);
-      }
-    } else {
-      const minPlayers = 3;
-      if (this.players.length < minPlayers) {
-        this.addBots(minPlayers - this.players.length);
-      }
-    }
     this.roundNumber = 0;
     this.dealerIndex = 0;
     this.phase = 'playing';

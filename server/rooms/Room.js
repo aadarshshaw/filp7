@@ -1,4 +1,5 @@
 import { GameEngine } from '../game/GameEngine.js';
+import { Bot } from '../game/Bot.js';
 
 /**
  * Represents a single game room / lobby.
@@ -20,12 +21,12 @@ export class Room {
       targetScore: settings.targetScore || 200,
       turnTimer: settings.turnTimer || 30,
       maxPlayers: Math.min(18, Math.max(3, settings.maxPlayers || 8)),
-      initialBots: settings.initialBots !== undefined ? settings.initialBots : 3,
     };
 
-    // Players in lobby (before game starts)
+    // Players and bots in lobby (before game starts)
     // Map of socketId → { id, name, isHost }
     this.lobbyPlayers = new Map();
+    this.lobbyBots = new Map();
 
     // Game engine (created when game starts)
     this.engine = null;
@@ -43,8 +44,12 @@ export class Room {
 
   /** Add a player to the lobby. */
   addPlayer(socketId, name) {
-    if (this.lobbyPlayers.size >= this.settings.maxPlayers) {
-      return { error: 'Room is full' };
+    if (this.playerCount >= this.settings.maxPlayers) {
+      if (this.lobbyBots.size > 0) {
+        this.removeBot();
+      } else {
+        return { error: 'Room is full' };
+      }
     }
     if (this.status === 'playing') {
       return { error: 'Game already in progress' };
@@ -58,6 +63,31 @@ export class Room {
     this.touch();
     return { success: true };
   }
+
+  /** Add a bot to the lobby. */
+  addBot() {
+    if (this.playerCount >= this.settings.maxPlayers) return false;
+    const bot = new Bot();
+    this.lobbyBots.set(bot.id, {
+      id: bot.id,
+      name: bot.name,
+      isBot: true,
+      joinedAt: Date.now(),
+    });
+    this.touch();
+    return true;
+  }
+
+  /** Remove a bot from the lobby. */
+  removeBot() {
+    if (this.lobbyBots.size === 0) return false;
+    // Remove the most recently added bot
+    const lastBotId = Array.from(this.lobbyBots.keys()).pop();
+    this.lobbyBots.delete(lastBotId);
+    this.touch();
+    return true;
+  }
+
   /** Handle player disconnection (keep them if playing) */
   handleDisconnect(playerId) {
     if (this.status === 'playing' && this.engine) {
@@ -106,9 +136,17 @@ export class Room {
     return { newHostId: null };
   }
 
-  /** Get the player list for broadcasting. */
+  /** Get all players (humans and bots) in lobby as an array. */
   getPlayerList() {
-    return Array.from(this.lobbyPlayers.values());
+    const humans = Array.from(this.lobbyPlayers.values()).map(p => ({
+      ...p,
+      isHost: p.id === this.hostId
+    }));
+    const bots = Array.from(this.lobbyBots.values()).map(b => ({
+      ...b,
+      isHost: false
+    }));
+    return [...humans, ...bots];
   }
 
   /** Check if a player is in this room. */
@@ -118,7 +156,7 @@ export class Room {
 
   /** Player count (lobby). */
   get playerCount() {
-    return this.lobbyPlayers.size;
+    return this.lobbyPlayers.size + this.lobbyBots.size;
   }
 
   /** Is the room empty? */
@@ -143,6 +181,11 @@ export class Room {
     // Add all lobby players to the engine
     for (const [socketId, info] of this.lobbyPlayers) {
       this.engine.addPlayer(socketId, info.name);
+    }
+    
+    // Add all lobby bots to the engine
+    for (const [botId, info] of this.lobbyBots) {
+      this.engine.addSpecificBot(botId, info.name);
     }
 
     this.status = 'playing';

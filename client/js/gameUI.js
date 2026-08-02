@@ -242,9 +242,7 @@ function renderMyHand(player) {
       myPanel.appendChild(overlay);
     } else if (player.isFrozen) {
       const overlay = document.createElement('div');
-      overlay.className = 'state-overlay';
-      overlay.style.color = '#3b82f6';
-      overlay.style.borderColor = '#3b82f6';
+      overlay.className = 'state-overlay frozen-overlay';
       overlay.textContent = '❄️ FROZEN';
       myPanel.appendChild(overlay);
     }
@@ -306,7 +304,7 @@ function renderOpponents(opponents, currentPlayerId) {
     let stateOverlay = '';
     if (opp.status === 'busted') stateOverlay = '<div class="state-overlay bust-overlay">💥 BUSTED</div>';
     else if (opp.status === 'stayed') stateOverlay = '<div class="state-overlay stay-overlay">✓ STAYED</div>';
-    else if (opp.isFrozen) stateOverlay = '<div class="state-overlay" style="color:#3b82f6; border-color:#3b82f6;">❄️ FROZEN</div>';
+    else if (opp.isFrozen) stateOverlay = '<div class="state-overlay frozen-overlay">❄️ FROZEN</div>';
     else if (opp.isOffline) stateOverlay = '<div class="state-overlay offline-overlay">🔌 OFFLINE</div>';
 
     panel.innerHTML = `

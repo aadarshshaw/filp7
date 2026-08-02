@@ -167,15 +167,6 @@
   margin-top: 4px;
 }
 
-@media (min-width: 1400px) {
-  .scoreboard-panel {
-    right: var(--space-md) !important;
-    opacity: 0.8;
-  }
-  .scoreboard-panel:hover {
-    opacity: 1;
-  }
-}
 
 .scoreboard-bar-fill {
   height: 100%;
@@ -342,6 +333,11 @@
 .stay-overlay {
   color: var(--accent-gold);
   border: 3px solid var(--accent-gold);
+  background: rgba(0,0,0,0.8);
+}
+.frozen-overlay {
+  color: #3b82f6;
+  border: 3px solid #3b82f6;
   background: rgba(0,0,0,0.8);
 }
 .offline-overlay {

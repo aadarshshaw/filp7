@@ -448,16 +448,7 @@ export class GameEngine {
     const winner = this.getWinner();
     if (winner) {
       this.phase = 'gameOver';
-      this.emit('game:over', {
-        winnerId: winner.id,
-        winnerName: winner.name,
-        finalScores: this.players.map(p => ({
-          id: p.id,
-          name: p.name,
-          totalScore: p.totalScore,
-          roundHistory: p.roundHistory,
-        })),
-      });
+      this.emit('game:over', this.getGameOverData(winner));
       this.broadcastState();
       return;
     }
@@ -470,6 +461,20 @@ export class GameEngine {
         this.nextRound();
       }
     }, 4000);
+  }
+
+  getGameOverData(winner = null) {
+    if (!winner) winner = this.getWinner();
+    return {
+      winnerId: winner?.id,
+      winnerName: winner?.name,
+      finalScores: this.players.map(p => ({
+        id: p.id,
+        name: p.name,
+        totalScore: p.totalScore,
+        roundHistory: p.roundHistory,
+      })),
+    };
   }
 
   nextRound() {
@@ -560,6 +565,7 @@ export class GameEngine {
 
   getState() {
     return {
+      hostId: this.hostId,
       phase: this.phase,
       roundNumber: this.roundNumber,
       targetScore: this.targetScore,

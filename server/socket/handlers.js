@@ -88,6 +88,9 @@ export function registerHandlers(io) {
         
         if (room.status === 'playing' && room.engine) {
           socket.emit('game:started', room.engine.getState());
+        } else if (room.status === 'finished' && room.engine) {
+          socket.emit('game:started', room.engine.getState());
+          socket.emit('game:over', room.engine.getGameOverData());
         }
       }
     });

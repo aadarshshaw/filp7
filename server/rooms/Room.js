@@ -137,6 +137,7 @@ export class Room {
   /** Start the game: create engine, add all lobby players, begin. */
   startGame(emitFn) {
     this.engine = new GameEngine(this.settings, emitFn);
+    this.engine.hostId = this.hostId;
 
     // Add all lobby players to the engine
     for (const [socketId, info] of this.lobbyPlayers) {

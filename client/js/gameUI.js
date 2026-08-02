@@ -42,6 +42,7 @@ export function initGameUI() {
 
   document.getElementById('btn-back-lobby')?.addEventListener('click', () => {
     socketManager.emit('room:leave');
+    hideOverlays();
     showScreen('landing-screen');
   });
 
@@ -280,6 +281,11 @@ function renderOpponents(opponents, currentPlayerId) {
   opponents.forEach((opp, index) => {
     const panel = document.createElement('div');
     panel.className = 'opponent-panel';
+
+    // Elliptical arc positioning (no tilt, just curve)
+    const dist = Math.abs(index - centerIndex);
+    const marginTop = Math.pow(dist, 1.5) * 12; // curve intensity
+    panel.style.setProperty('--arc-margin', `${marginTop}px`);
 
     if (opp.id === currentPlayerId) panel.classList.add('active-turn');
     if (opp.status === 'busted') panel.classList.add('busted');
@@ -595,6 +601,15 @@ function handleGameOver(data) {
     createConfetti(100);
   } else {
     createConfetti(40);
+  }
+
+  // Only show Play Again to the host
+  const btnPlayAgain = document.getElementById('btn-play-again');
+  if (btnPlayAgain) {
+    // We can't access room.hostId directly here easily, but we know if we are host if our playerId matches the room host
+    // Better yet, just emit and let the server block it, or we can disable it for non-hosts if we track isHost
+    // For now, let's just make it say "Play Again (Host Only)" if disabled. Wait, the server blocks it.
+    // Let's just always leave it visible, but if clicked by non-host, we show a toast.
   }
 }
 

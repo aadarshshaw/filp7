@@ -187,7 +187,7 @@ export class Player {
       isBot: this.isBot,
       hand: this.hand,
       modifiers: this.modifiers,
-      roundScore: this.roundScore,
+      roundScore: this.calculateScore(),
       totalScore: this.totalScore,
       status: this.status,
       uniqueNumberCount: this.uniqueNumberCount,
@@ -205,7 +205,7 @@ export class Player {
       isBot: this.isBot,
       hand: this.hand,           // cards are face-up in Flip 7
       modifiers: this.modifiers,
-      roundScore: this.roundScore,
+      roundScore: this.calculateScore(),
       totalScore: this.totalScore,
       status: this.status,
       uniqueNumberCount: this.uniqueNumberCount,

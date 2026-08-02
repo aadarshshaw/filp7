@@ -192,10 +192,8 @@ function renderMyHand(player) {
   const totalCards = player.hand.length + player.modifiers.length;
   const uniqueCount = player.uniqueNumberCount || 0;
   
-  // Calculate round score
-  const handScore = player.hand.reduce((s, c) => s + c.value, 0);
-  const modScore = player.modifiers.reduce((s, c) => s + (c.value || 0), 0);
-  const totalCurrentScore = handScore + modScore;
+  // Get round score from server state
+  const totalCurrentScore = player.roundScore || 0;
 
   // Update DOM with rolling numbers
   const totalScoreEl = document.getElementById('status-total-score');
@@ -285,9 +283,8 @@ function renderOpponents(opponents, currentPlayerId) {
     if (opp.status === 'stayed') panel.classList.add('stayed');
 
     // Calculate running hand score
-    const handScore = opp.hand.reduce((s, c) => s + c.value, 0);
-    const modScore = opp.modifiers.reduce((s, c) => s + (c.value || 0), 0);
-    const totalCurrentScore = handScore + modScore;
+    // Get round score from server state
+    const totalCurrentScore = opp.roundScore || 0;
     const cardsCount = opp.hand.length + opp.modifiers.length;
 
     const avatarColor = getPlayerColor(index);

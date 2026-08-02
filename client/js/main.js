@@ -161,6 +161,7 @@ function bindLobby() {
   // Leave button
   document.getElementById('btn-leave-lobby').addEventListener('click', () => {
     socketManager.emit('room:leave');
+    localStorage.removeItem('flip7_roomCode');
     showScreen('landing-screen');
     currentRoom = null;
   });
@@ -303,6 +304,7 @@ function addChatMessage(msg) {
 function bindSocketEvents() {
   // Room created
   socketManager.on('room:created', (room) => {
+    localStorage.setItem('flip7_roomCode', room.code);
     updateLobby(room);
     updatePlayerList(room.players);
     showScreen('lobby-screen');
@@ -311,6 +313,7 @@ function bindSocketEvents() {
 
   // Room joined
   socketManager.on('room:joined', (room) => {
+    localStorage.setItem('flip7_roomCode', room.code);
     updateLobby(room);
     updatePlayerList(room.players);
     showScreen('lobby-screen');

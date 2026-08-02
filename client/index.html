@@ -6,13 +6,28 @@
   <meta name="description" content="Flip 7 — Play the hit press-your-luck card game online with friends. Create a room, share the code, and start flipping!">
   <title>Flip 7 — Online Multiplayer Card Game</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/lobby.css">
-  <link rel="stylesheet" href="css/game.css">
-  <link rel="stylesheet" href="css/animations.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/lobby.css">
+  <link rel="stylesheet" href="/css/game.css">
+  <link rel="stylesheet" href="/css/animations.css">
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.warn('Service Worker registration failed:', err);
+        });
+      });
+    }
+  </script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
@@ -295,12 +310,14 @@
 
       <!-- Current Player's Hand -->
       <div class="player-hand-area">
-        <div class="hand-label">Your Cards</div>
-        <div class="player-hand" id="player-hand">
-          <!-- dynamically populated -->
-        </div>
-        <div class="player-modifiers" id="player-modifiers">
-          <!-- modifier cards -->
+        <div class="hand-label">Your Hand &nbsp;•&nbsp; 0 Cards &nbsp;•&nbsp; 0/7 Unique for Flip 7</div>
+        <div class="hand-row">
+          <div class="player-hand" id="player-hand">
+            <!-- dynamically populated -->
+          </div>
+          <div class="player-modifiers" id="player-modifiers">
+            <!-- modifier cards -->
+          </div>
         </div>
       </div>
 

@@ -226,6 +226,8 @@ function renderOpponents(opponents, currentPlayerId) {
     let statusText = 'Active';
     if (opp.status === 'busted') { statusClass = 'status-busted'; statusText = 'Busted'; }
     if (opp.status === 'stayed') { statusClass = 'status-stayed'; statusText = 'Stayed'; }
+    if (opp.status === 'frozen') { statusClass = 'status-frozen'; statusText = 'Frozen'; }
+    if (opp.isOffline) { statusClass = 'status-offline'; statusText = 'Offline'; }
 
     // Calculate running hand score
     const handScore = opp.hand.reduce((s, c) => s + c.value, 0);

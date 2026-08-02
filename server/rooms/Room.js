@@ -57,6 +57,31 @@ export class Room {
     this.touch();
     return { success: true };
   }
+  /** Handle player disconnection (keep them if playing) */
+  handleDisconnect(playerId) {
+    if (this.status === 'playing' && this.engine) {
+      const p = this.engine.players.find(p => p.id === playerId);
+      if (p) {
+        p.isOffline = true;
+        const lp = this.lobbyPlayers.get(playerId);
+        if (lp) lp.isOffline = true;
+        this.touch();
+        return { isOffline: true };
+      }
+    }
+    return this.removePlayer(playerId);
+  }
+
+  /** Handle player reconnection */
+  handleReconnect(playerId) {
+    if (this.engine) {
+      const p = this.engine.players.find(p => p.id === playerId);
+      if (p) p.isOffline = false;
+    }
+    const lp = this.lobbyPlayers.get(playerId);
+    if (lp) lp.isOffline = false;
+    this.touch();
+  }
 
   /** Remove a player from the lobby or game. */
   removePlayer(socketId) {

@@ -4,15 +4,11 @@ const roomManager = new RoomManager();
 
 /**
  * Register Socket.IO event handlers.
- *
- * IMPORTANT: The GameEngine is fully self-contained.
- * It handles round transitions, bot scheduling, and state broadcasts
- * via its emit callback. Socket handlers should NOT set extra timers
- * or duplicate state emissions.
  */
 export function registerHandlers(io) {
   io.on('connection', (socket) => {
-    console.log(`[Socket] Connected: ${socket.id}`);
+    socket.playerId = socket.handshake.auth?.playerId || socket.id;
+    console.log(`[Socket] Connected: ${socket.id} (Player ID: ${socket.playerId})`);
 
     // ═══════════════════════════════════════
     //  ROOM MANAGEMENT
@@ -20,12 +16,12 @@ export function registerHandlers(io) {
 
     socket.on('room:create', (data) => {
       const { playerName, settings } = data;
-      const room = roomManager.createRoom(socket.id, settings);
+      const room = roomManager.createRoom(socket.playerId, settings);
 
       socket.playerName = playerName;
       socket.roomCode = room.code;
       socket.join(room.code);
-      room.addPlayer(socket.id, playerName);
+      room.addPlayer(socket.playerId, playerName);
 
       console.log(`[Room] Created: ${room.code} by ${playerName}`);
 
@@ -45,7 +41,7 @@ export function registerHandlers(io) {
         return socket.emit('error', { message: 'Room not found' });
       }
 
-      const result = room.addPlayer(socket.id, playerName);
+      const result = room.addPlayer(socket.playerId, playerName);
       if (result.error) {
         return socket.emit('error', { message: result.error });
       }
@@ -67,6 +63,38 @@ export function registerHandlers(io) {
 
       socket.emit('room:joined', room.toJSON());
     });
+    
+    socket.on('room:rejoin', (data) => {
+      const { roomCode } = data;
+      const codeToUse = (roomCode || '').toUpperCase();
+      const room = roomManager.getRoom(codeToUse);
+      
+      if (!room) return;
+      
+      if (room.hasPlayer(socket.playerId)) {
+        console.log(`[Room] ${socket.playerId} rejoining ${codeToUse}`);
+        
+        socket.roomCode = codeToUse;
+        socket.join(codeToUse);
+        
+        // Grab player name from lobby map
+        const p = room.lobbyPlayers.get(socket.playerId);
+        if (p) socket.playerName = p.name;
+        
+        room.handleReconnect(socket.playerId);
+        
+        socket.emit('room:joined', room.toJSON());
+        io.to(codeToUse).emit('room:playerList', room.getPlayerList());
+        
+        if (room.status === 'playing' && room.engine) {
+          socket.emit('game:started', room.engine.getState());
+        }
+      }
+    });
+
+    socket.on('room:leave', () => {
+      leaveCurrentRoom(socket, io, true); // true = force remove
+    });
 
     // ═══════════════════════════════════════
     //  GAME START
@@ -75,10 +103,9 @@ export function registerHandlers(io) {
     socket.on('game:start', (data, callback) => {
       const room = roomManager.getRoom(socket.roomCode);
       if (!room) return callback?.({ success: false, error: 'Room not found' });
-      if (room.hostId !== socket.id) return callback?.({ success: false, error: 'Only host can start' });
+      if (room.hostId !== socket.playerId) return callback?.({ success: false, error: 'Only host can start' });
       if (!room.canStart()) return callback?.({ success: false, error: 'Cannot start game' });
 
-      // Create the emit function that broadcasts to the room
       const emitFn = (event, eventData) => {
         io.to(room.code).emit(event, eventData);
       };
@@ -86,7 +113,6 @@ export function registerHandlers(io) {
       room.startGame(emitFn);
       console.log(`[Game] Started in room ${room.code}`);
 
-      // Send initial state to all players
       io.to(room.code).emit('game:started', room.engine.getState());
       callback?.({ success: true });
     });
@@ -99,22 +125,20 @@ export function registerHandlers(io) {
       const room = roomManager.getRoom(socket.roomCode);
       if (!room || !room.engine) return;
 
-      const result = room.engine.hit(socket.id);
+      const result = room.engine.hit(socket.playerId);
       if (result.error) {
         socket.emit('error', { message: result.error });
       }
-      // Engine handles all state broadcasts and round transitions
     });
 
     socket.on('game:stay', () => {
       const room = roomManager.getRoom(socket.roomCode);
       if (!room || !room.engine) return;
 
-      const result = room.engine.stay(socket.id);
+      const result = room.engine.stay(socket.playerId);
       if (result.error) {
         socket.emit('error', { message: result.error });
       }
-      // Engine handles all state broadcasts and round transitions
     });
 
     socket.on('game:action', (data) => {
@@ -122,11 +146,10 @@ export function registerHandlers(io) {
       const room = roomManager.getRoom(socket.roomCode);
       if (!room || !room.engine) return;
 
-      const result = room.engine.resolveAction(socket.id, null, targetId);
+      const result = room.engine.resolveAction(socket.playerId, null, targetId);
       if (result.error) {
         socket.emit('error', { message: result.error });
       }
-      // Engine handles all state broadcasts and round transitions
     });
 
     socket.on('game:nextRound', () => {
@@ -138,7 +161,7 @@ export function registerHandlers(io) {
     socket.on('game:playAgain', () => {
       const room = roomManager.getRoom(socket.roomCode);
       if (!room) return;
-      if (room.hostId !== socket.id) return;
+      if (room.hostId !== socket.playerId) return;
       room.resetGame();
       io.to(room.code).emit('game:reset', room.toJSON());
     });
@@ -152,7 +175,7 @@ export function registerHandlers(io) {
       if (!text || text.trim().length === 0) return;
       const room = roomManager.getRoom(socket.roomCode);
       if (!room) return;
-      const msg = room.addChatMessage(socket.id, socket.playerName, text.trim());
+      const msg = room.addChatMessage(socket.playerId, socket.playerName, text.trim());
       io.to(room.code).emit('chat:message', msg);
     });
 
@@ -161,8 +184,8 @@ export function registerHandlers(io) {
     // ═══════════════════════════════════════
 
     socket.on('disconnect', () => {
-      console.log(`[Socket] Disconnected: ${socket.id}`);
-      leaveCurrentRoom(socket, io);
+      console.log(`[Socket] Disconnected: ${socket.id} (Player ID: ${socket.playerId})`);
+      leaveCurrentRoom(socket, io, false);
     });
   });
 }
@@ -170,14 +193,29 @@ export function registerHandlers(io) {
 /**
  * Remove a socket from its current room.
  */
-function leaveCurrentRoom(socket, io) {
+function leaveCurrentRoom(socket, io, forceRemove = false) {
   if (!socket.roomCode) return;
+  const room = roomManager.getRoom(socket.roomCode);
+  if (!room) return;
 
-  const { room, newHostId } = roomManager.removePlayer(socket.id);
+  socket.leave(room.code);
 
-  if (room) {
-    socket.leave(room.code);
+  let newHostId = null;
+  let isOfflineOnly = false;
+  
+  if (forceRemove) {
+    const res = roomManager.removePlayer(socket.playerId);
+    newHostId = res?.newHostId;
+  } else {
+    const res = room.handleDisconnect(socket.playerId);
+    newHostId = res?.newHostId;
+    isOfflineOnly = res?.isOffline;
+  }
 
+  if (isOfflineOnly) {
+    io.to(room.code).emit('room:playerList', room.getPlayerList());
+    if (room.engine) io.to(room.code).emit('game:state', room.engine.getState());
+  } else {
     io.to(room.code).emit('room:playerList', room.getPlayerList());
     io.to(room.code).emit('chat:message', {
       id: Date.now().toString(36),
@@ -190,10 +228,6 @@ function leaveCurrentRoom(socket, io) {
     if (newHostId) {
       io.to(room.code).emit('room:newHost', { hostId: newHostId });
     }
-
-    // Engine removePlayer handles game state updates internally
-  } else {
-    socket.leave(socket.roomCode);
   }
 
   socket.roomCode = null;

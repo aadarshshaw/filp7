@@ -45,7 +45,7 @@ export class ActionResolver {
     const events = [];
 
     if (target && target.isActive) {
-      target.stay();
+      target.freeze();
       events.push({
         type: 'action:freeze',
         drawerId: drawer.id,

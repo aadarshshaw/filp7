@@ -13,6 +13,7 @@ export class Player {
     this.id = id;
     this.name = name;
     this.isBot = isBot;
+    this.isOffline = false;
 
     // ── Per-round state (reset each round) ──
     this.hand = [];           // number cards in front of the player
@@ -96,6 +97,10 @@ export class Player {
     this.status = 'stayed';
   }
 
+  freeze() {
+    this.status = 'frozen';
+  }
+
   bust() {
     this.status = 'busted';
     this.roundScore = 0;
@@ -106,7 +111,7 @@ export class Player {
   }
 
   get hasStayed() {
-    return this.status === 'stayed';
+    return this.status === 'stayed' || this.status === 'frozen';
   }
 
   get hasBusted() {

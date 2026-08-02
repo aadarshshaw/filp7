@@ -5,10 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "node server/index.js",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/unit --forceExit",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit && npm run test:e2e",
+    "prepare": "husky"
   },
   "dependencies": {
     "express": "^4.21.0",
     "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "husky": "^9.1.7",
+    "jest": "^30.4.2"
   }
 }

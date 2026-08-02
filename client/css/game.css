@@ -200,6 +200,25 @@
   background: var(--accent-danger-dim);
   color: var(--accent-danger);
 }
+.opponent-status.status-frozen {
+  background: rgba(147, 197, 253, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(147, 197, 253, 0.5);
+  box-shadow: 0 0 8px rgba(147, 197, 253, 0.4);
+}
+.opponent-status.status-offline {
+  background: #64748b;
+  color: #fff;
+}
+
+.opponent.is-inactive {
+  opacity: 0.6;
+}
+
+.opponent.is-offline {
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
 
 .opponent-cards {
   display: flex;
@@ -285,21 +304,25 @@
   font-weight: 600;
   margin-bottom: var(--space-xs);
 }
+.hand-row {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  align-items: center;
+  padding: 6px 0;
+  -webkit-overflow-scrolling: touch;
+}
 .player-hand {
   display: flex;
   gap: 10px;
-  overflow-x: auto;
-  padding: 6px 0;
-  min-height: 140px;
-  align-items: center;
-  -webkit-overflow-scrolling: touch;
+  min-height: 126px; /* Forces exact card height to prevent collapse */
 }
 .player-modifiers {
   display: flex;
   gap: 10px;
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 126px; /* Exact card height */
+  padding-left: 20px;
+  border-left: 2px dashed rgba(255, 255, 255, 0.15); /* Separator */
 }
 
 /* ── Action Bar ── */

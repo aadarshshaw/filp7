@@ -8,11 +8,19 @@ class SocketManager {
     this.socket = null;
     this.listeners = new Map();
     this.connectionCallbacks = [];
+    
+    // Generate or retrieve persistent playerId
+    this.playerId = localStorage.getItem('flip7_playerId');
+    if (!this.playerId) {
+      this.playerId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2);
+      localStorage.setItem('flip7_playerId', this.playerId);
+    }
   }
 
   /** Connect to the server. */
   connect() {
     this.socket = io({
+      auth: { playerId: this.playerId },
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,
@@ -25,6 +33,11 @@ class SocketManager {
       console.log('[Socket] Connected:', this.socket.id);
       this.updateConnectionUI('connected');
       this.connectionCallbacks.forEach(cb => cb('connected'));
+      
+      const lastRoom = localStorage.getItem('flip7_roomCode');
+      if (lastRoom) {
+        this.socket.emit('room:rejoin', { roomCode: lastRoom });
+      }
     });
 
     this.socket.on('disconnect', (reason) => {

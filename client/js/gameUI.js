@@ -703,10 +703,10 @@ function startTurnTimer(duration) {
 
   const bar = document.getElementById('turn-timer-bar');
   if (bar) {
-    bar.classList.add('timer-active');
+    bar.classList.remove('timer-active');
+    void bar.offsetWidth; // Force reflow
     bar.style.setProperty('--timer-duration', `${duration}s`);
-    // Force reflow
-    bar.offsetHeight;
+    bar.classList.add('timer-active');
   }
 
   const countEl = document.getElementById('turn-timer-count');
@@ -724,7 +724,7 @@ function startTurnTimer(duration) {
       countEl.textContent = `${remaining}s`;
       
       // HSL: Green(120) to Red(0)
-      const hue = Math.max(0, Math.min(120, (remaining / timerDuration) * 120));
+      const hue = Math.max(0, Math.min(120, (remaining / duration) * 120));
       countEl.style.color = `hsl(${hue}, 80%, 50%)`;
 
       if (remaining <= 5) {

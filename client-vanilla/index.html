@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Flip 7 — Play the hit press-your-luck card game online with friends. Create a room, share the code, and start flipping!">
+  <title>Flip 7 — Online Multiplayer Card Game</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/lobby.css">
+  <link rel="stylesheet" href="/css/game.css">
+  <link rel="stylesheet" href="/css/animations.css">
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.warn('Service Worker registration failed:', err);
+        });
+      });
+    }
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  LANDING SCREEN                         -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="landing-screen" class="screen active">
+    <div class="landing-bg">
+      <div class="floating-card fc-1">🃏</div>
+      <div class="floating-card fc-2">7</div>
+      <div class="floating-card fc-3">🎴</div>
+      <div class="floating-card fc-4">♠</div>
+      <div class="floating-card fc-5">♦</div>
+    </div>
+
+    <div class="landing-content">
+      <div class="logo-container">
+        <h1 class="game-logo">
+          <span class="logo-flip">FLIP</span>
+          <span class="logo-seven">7</span>
+        </h1>
+        <p class="tagline">Press your luck. Don't bust.</p>
+      </div>
+
+      <div class="landing-actions">
+        <button id="btn-create-room" class="btn btn-primary btn-glow">
+          <span class="btn-icon">✦</span>
+          Create Room
+        </button>
+        <button id="btn-join-room" class="btn btn-secondary">
+          <span class="btn-icon">→</span>
+          Join Room
+        </button>
+        <button id="btn-rules" class="btn btn-ghost">
+          <span class="btn-icon">📖</span>
+          How to Play
+        </button>
+      </div>
+
+      <div class="landing-footer">
+        <p>3–18 players • Real-time multiplayer • No downloads</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  CREATE ROOM MODAL                      -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="modal-create" class="modal-overlay">
+    <div class="modal glass-panel">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2 class="modal-title">Create a Room</h2>
+
+      <form id="form-create" class="modal-form">
+        <div class="form-group">
+          <label for="create-name">Your Name</label>
+          <input type="text" id="create-name" placeholder="Enter your display name" maxlength="20" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="create-target">Target Score</label>
+          <div class="segmented-control" id="create-target">
+            <button type="button" class="seg-btn" data-value="100">100</button>
+            <button type="button" class="seg-btn active" data-value="200">200</button>
+            <button type="button" class="seg-btn" data-value="300">300</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="create-timer">Turn Timer</label>
+          <div class="range-group">
+            <input type="range" id="create-timer" min="10" max="60" value="30" step="5">
+            <span class="range-value" id="timer-value">30s</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="create-max">Max Players</label>
+          <div class="range-group">
+            <input type="range" id="create-max" min="3" max="18" value="8" step="1">
+            <span class="range-value" id="max-value">8</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">Create Room</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  JOIN ROOM MODAL                        -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="modal-join" class="modal-overlay">
+    <div class="modal glass-panel">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2 class="modal-title">Join a Room</h2>
+
+      <form id="form-join" class="modal-form">
+        <div class="form-group">
+          <label for="join-name">Your Name</label>
+          <input type="text" id="join-name" placeholder="Enter your display name" maxlength="20" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="join-code">Room Code</label>
+          <input type="text" id="join-code" placeholder="e.g. ABC123" maxlength="6" required autocomplete="off" class="code-input">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">Join Room</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  RULES MODAL                            -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="modal-rules" class="modal-overlay">
+    <div class="modal glass-panel" style="max-width: 600px; padding-bottom: 24px;">
+      <button class="modal-close" data-close-modal>&times;</button>
+      <h2 class="modal-title">How to Play Flip 7</h2>
+      
+      <div class="rules-content" style="text-align: left; max-height: 60vh; overflow-y: auto; padding-right: 12px; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">The Goal</h3>
+        <p style="margin-bottom: 16px;">Score the most points by drawing cards. Game ends when a player reaches the target score!</p>
+
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Gameplay</h3>
+        <ul style="margin-bottom: 16px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>Hit:</strong> Draw a card from the deck.</li>
+          <li><strong>Stay:</strong> Lock in your current score and wait for the round to end.</li>
+          <li><strong style="color: var(--accent-danger);">Busting:</strong> If you draw a number card that you <strong>already have</strong> in your hand, you BUST! You lose all points for the round and are out until the next round.</li>
+        </ul>
+
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Card Types</h3>
+        <ul style="margin-bottom: 16px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>Number Cards (0-12):</strong> Add their value to your score. The number of cards in the deck equals their value (e.g., there are ten 10s, but only one 1).</li>
+          <li><strong style="color: #d97706;">Modifiers:</strong> (+2, +4, +6, etc. and x2) Special cards that increase your total score. These do not count towards your unique number cards.</li>
+          <li><strong style="color: #6d28d9;">Action Cards:</strong> Special cards that mess with your opponents or save you.</li>
+        </ul>
+
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Special Actions</h3>
+        <ul style="margin-bottom: 16px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <li><strong>❄️ Freeze:</strong> Force an active opponent to instantly STAY.</li>
+          <li><strong>🃏 Flip Three:</strong> Force an opponent to draw 3 times on their turn.</li>
+          <li><strong>🔄 Second Chance:</strong> Automatically saves you from busting once.</li>
+        </ul>
+
+        <h3 style="color: var(--accent-gold); margin-bottom: 8px;">The Flip 7 Bonus</h3>
+        <p>If you manage to collect <strong>7 unique number cards</strong> without busting, the round instantly ends and you receive a <strong>15 point bonus</strong> on top of your hand score!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  LOBBY SCREEN                           -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="lobby-screen" class="screen">
+    <div class="lobby-container">
+      <div class="lobby-header">
+        <button id="btn-leave-lobby" class="btn btn-ghost btn-sm">← Leave</button>
+        <h2 class="lobby-title">Game Lobby</h2>
+      </div>
+
+      <div class="room-code-display glass-panel">
+        <span class="room-code-label">Room Code</span>
+        <span class="room-code" id="lobby-room-code">------</span>
+        <button id="btn-copy-code" class="btn btn-ghost btn-sm" title="Copy code">📋 Copy</button>
+      </div>
+
+      <div class="lobby-body">
+        <div class="lobby-main">
+          <div class="settings-summary glass-panel">
+            <h3>Settings</h3>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <span class="setting-label">Target</span>
+                <span class="setting-value" id="lobby-target">200 pts</span>
+              </div>
+              <div class="setting-item">
+                <span class="setting-label">Timer</span>
+                <span class="setting-value" id="lobby-timer">30s</span>
+              </div>
+              <div class="setting-item">
+                <span class="setting-label">Max</span>
+                <span class="setting-value" id="lobby-max">8</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="player-list-container glass-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+              <h3 style="margin: 0;">Players <span class="player-count" id="lobby-player-count">0/8</span></h3>
+              <div id="bot-controls" style="display: none; gap: var(--space-sm);">
+                <button id="btn-remove-bot" class="btn btn-secondary btn-sm">- Bot</button>
+                <button id="btn-add-bot" class="btn btn-secondary btn-sm">+ Bot</button>
+              </div>
+            </div>
+            <ul class="player-list" id="lobby-player-list">
+              <!-- dynamically populated -->
+            </ul>
+          </div>
+
+          <div class="lobby-actions" id="lobby-actions">
+            <button id="btn-start-game" class="btn btn-primary btn-glow btn-full" disabled>
+              Waiting for players...
+            </button>
+          </div>
+        </div>
+
+        <div class="lobby-chat glass-panel">
+          <h3>Chat</h3>
+          <div class="chat-messages" id="lobby-chat-messages">
+            <!-- dynamically populated -->
+          </div>
+          <form class="chat-input-form" id="form-chat">
+            <input type="text" id="chat-input" placeholder="Type a message..." maxlength="200" autocomplete="off">
+            <button type="submit" class="btn btn-primary btn-sm">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!--  GAME SCREEN                            -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="game-screen" class="screen">
+    <!-- Center Screen Splash Animation Container -->
+    <div id="game-splash" class="splash-text"></div>
+
+    <div class="game-container">
+      <!-- Top Bar: Single line banner -->
+      <div class="game-topbar">
+        <div class="game-round-info topbar-section">
+          <span class="round-label">Round</span>
+          <span class="round-number" id="game-round-number">1</span>
+        </div>
+        <div class="game-target-info topbar-section">
+          Target <span class="highlight-number" id="game-target-score">200</span>
+        </div>
+        <div class="deck-info topbar-section">
+          Deck <span class="highlight-number" id="game-deck-remaining">94</span>
+        </div>
+        <button id="btn-toggle-scoreboard" class="btn btn-ghost btn-sm topbar-btn" title="Scoreboard">🏆</button>
+      </div>
+
+      <!-- Scoreboard Sidebar -->
+      <div class="scoreboard-panel glass-panel" id="scoreboard-panel">
+        <h3>Scoreboard</h3>
+        <div class="scoreboard-list" id="scoreboard-list">
+          <!-- dynamically populated -->
+        </div>
+      </div>
+
+      <!-- The Play Table -->
+      <div class="table-area" id="table-area">
+        
+        <!-- Opponents (Positioned absolutely via JS) -->
+        <div class="opponents-area" id="opponents-area">
+          <!-- dynamically populated -->
+        </div>
+
+        <!-- Center Stage: Deck + Last Drawn -->
+        <div class="center-stage">
+          <div class="deck-pile" id="deck-pile">
+            <div class="card card-back">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="100%" height="100%" style="display:block;">
+                <defs>
+                  <linearGradient id="backGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#059669" />
+                    <stop offset="100%" stop-color="#064e3b" />
+                  </linearGradient>
+                  <pattern id="backPat" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M20,0 L40,20 L20,40 L0,20 Z" fill="none" stroke="#047857" stroke-width="2" />
+                    <circle cx="20" cy="20" r="4" fill="#047857" />
+                  </pattern>
+                </defs>
+                <rect width="200" height="280" fill="url(#backGrad)" />
+                <rect width="200" height="280" fill="url(#backPat)" />
+                <rect x="12" y="12" width="176" height="256" fill="none" stroke="#f59e0b" stroke-width="3" rx="8" />
+                <rect x="30" y="90" width="140" height="100" fill="rgba(6, 78, 59, 0.95)" rx="4" />
+                <text x="100" y="135" font-family="Outfit, sans-serif" font-weight="900" font-size="32" fill="#fff" text-anchor="middle" letter-spacing="2">FLIP</text>
+                <text x="100" y="175" font-family="Outfit, sans-serif" font-weight="900" font-size="44" fill="#f59e0b" text-anchor="middle">7</text>
+              </svg>
+            </div>
+          </div>
+          <div class="last-drawn-area" id="last-drawn-area">
+            <!-- shows the last card drawn with animation -->
+          </div>
+        </div>
+
+        <!-- Player Bottom Area -->
+        <div class="player-bottom-area">
+          
+          <!-- Action Buttons & Turn Indicator -->
+          <div class="action-bar" id="action-bar">
+            <div class="turn-indicator" id="turn-indicator">
+              <div class="turn-indicator-compact">
+                <span class="turn-text" id="turn-text">Waiting...</span>
+                <span class="turn-timer-count" id="turn-timer-count" style="display:none;"></span>
+              </div>
+              <div class="turn-timer-bar" id="turn-timer-bar"></div>
+            </div>
+            <div class="action-buttons" id="action-buttons" style="visibility: hidden;">
+              <button id="btn-hit" class="btn btn-hit btn-glow">
+                <span class="btn-label">HIT</span>
+              </button>
+              <button id="btn-stay" class="btn btn-stay btn-outline">
+                <span class="btn-label">Stay</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Unified Player Card Panel -->
+          <div class="player-card-panel" id="my-player-panel">
+            <div class="hand-row">
+              <div class="player-hand" id="player-hand">
+                <!-- dynamically populated -->
+              </div>
+              <div class="player-modifiers" id="player-modifiers">
+                <!-- modifier cards -->
+              </div>
+            </div>
+            
+            <!-- Player Status Bar (Stats) -->
+            <div class="player-stats-bottom" id="player-status-bar">
+              <div class="stat-block">
+                <span class="stat-label">ROUND</span>
+                <span class="stat-value highlight-number" id="status-round-score">0</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-block">
+                <span class="stat-label">OVERALL</span>
+                <span class="stat-value accent-color" id="status-total-score">0</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-block">
+                <span class="stat-label">UNIQUE</span>
+                <span class="stat-value" id="status-unique-count">0/7</span>
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- /.player-bottom-area -->
+      </div> <!-- /.table-area -->
+      
+    </div>
+
+  </section>
+
+  <!-- Action Card Target Modal -->
+  <div class="modal-overlay" id="modal-action-target" style="display: none; z-index: 9999;">
+    <div class="modal glass-panel">
+      <h2 class="modal-title" id="action-target-title">Choose a Target</h2>
+      <p class="action-card-desc" id="action-card-desc"></p>
+      <div class="target-list" id="target-list">
+        <!-- dynamically populated -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Round End Overlay -->
+  <div class="overlay" id="round-end-overlay" style="display: none; z-index: 9999;">
+    <div class="overlay-content glass-panel">
+      <h2 class="overlay-title">Round Complete!</h2>
+      <div class="round-scores" id="round-scores">
+        <!-- dynamically populated -->
+      </div>
+      <p class="next-round-timer">Next round starting...</p>
+    </div>
+  </div>
+
+  <!-- Game Over Overlay -->
+  <div class="overlay" id="game-over-overlay" style="display: none; z-index: 9999;">
+    <div class="overlay-content glass-panel game-over-content">
+      <div class="winner-celebration" id="winner-celebration">
+        <h2 class="overlay-title">🏆 Game Over! 🏆</h2>
+        <div class="winner-name" id="winner-name">Winner</div>
+      </div>
+      <div class="final-scores" id="final-scores">
+        <!-- dynamically populated -->
+      </div>
+      <div class="game-over-actions">
+        <button id="btn-play-again" class="btn btn-primary btn-glow">Play Again</button>
+        <button id="btn-back-lobby" class="btn btn-secondary">Back to Lobby</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Connection Status -->
+  <div class="connection-status" id="connection-status">
+    <span class="connection-dot"></span>
+    <span class="connection-text">Connected</span>
+  </div>
+
+  <script type="module" src="js/main.js?v=5"></script>
+</body>
+</html>

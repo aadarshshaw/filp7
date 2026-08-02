@@ -21,7 +21,7 @@ const io = new Server(httpServer, {
 });
 
 // ── Serve static client files ──
-const clientPath = path.join(__dirname, '..', 'client');
+const clientPath = path.join(__dirname, '..', 'client', 'dist');
 app.use(express.static(clientPath));
 
 // ── Health check ──

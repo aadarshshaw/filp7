@@ -1,0 +1,301 @@
+/* ═══════════════════════════════════════════════
+   FLIP 7 — Animations
+   ═══════════════════════════════════════════════ */
+
+/* ── Keyframes ── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-20px) rotate(5deg); }
+  50% { transform: translateY(-10px) rotate(-3deg); }
+  75% { transform: translateY(-25px) rotate(4deg); }
+}
+
+@keyframes seven-glow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
+  50% { filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.6)); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3); }
+  50% { box-shadow: 0 4px 30px rgba(0, 212, 170, 0.5); }
+}
+
+@keyframes pulse-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(40px); }
+}
+
+/* ── Card Deal Animation ── */
+@keyframes cardDeal {
+  0% {
+    opacity: 0;
+    transform: translate(-80px, -150px) scale(0.3) rotateX(60deg) rotateY(180deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.15) rotateX(0deg) rotateY(90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotateX(0deg) rotateY(0deg);
+  }
+}
+
+.card-deal-in {
+  animation: cardDeal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Card Flip ── */
+@keyframes cardFlip {
+  0%   { transform: perspective(600px) rotateY(180deg); }
+  100% { transform: perspective(600px) rotateY(0deg); }
+}
+
+.card-flip {
+  animation: cardFlip 0.5s ease-out;
+  backface-visibility: hidden;
+}
+
+/* ── Bust Animation ── */
+@keyframes cardBust {
+  0%   { transform: scale(1); opacity: 1; }
+  20%  { transform: scale(1.1) rotate(-2deg); }
+  40%  { transform: scale(1.05) rotate(2deg); }
+  60%  { transform: scale(0.95) rotate(-1deg); opacity: 0.8; }
+  80%  { transform: scale(0.8); opacity: 0.4; }
+  100% { transform: scale(0.5) translateY(30px); opacity: 0; }
+}
+
+.card-bust {
+  animation: cardBust 0.7s ease-in forwards;
+}
+
+/* ── Stay Glow ── */
+@keyframes stayGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+  50%  { box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.3); }
+  100% { box-shadow: 0 0 10px 2px rgba(255, 215, 0, 0.15); }
+}
+
+.card-stay {
+  animation: stayGlow 0.8s ease;
+  border-color: rgba(255, 215, 0, 0.3) !important;
+}
+
+/* ── Score Count-up ── */
+@keyframes countUp {
+  from { transform: scale(1.3); color: var(--accent-gold); }
+  to   { transform: scale(1); }
+}
+
+.score-update {
+  animation: countUp 0.5s ease;
+}
+
+/* ── Flip 7 Celebration ── */
+@keyframes flip7Burst {
+  0%   { transform: scale(0); opacity: 0; }
+  50%  { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.flip7-celebration {
+  animation: flip7Burst 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Confetti Particles ── */
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-top);
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  animation: confettiFall linear forwards;
+}
+
+/* ── Turn Indicator Pulse ── */
+@keyframes turnPulse {
+  0%, 100% { border-color: rgba(0, 212, 170, 0.3); }
+  50% { border-color: rgba(0, 212, 170, 0.7); }
+}
+
+.active-turn-pulse {
+  animation: turnPulse 1.5s ease-in-out infinite;
+}
+
+/* ── Shake (for errors) ── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-4px); }
+}
+
+.shake {
+  animation: shake 0.4s ease;
+}
+
+/* ── Second Chance Save ── */
+@keyframes secondChanceSave {
+  0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 92, 191, 0); }
+  50%  { transform: scale(1.15); box-shadow: 0 0 30px 10px rgba(124, 92, 191, 0.4); }
+  100% { transform: scale(1); box-shadow: 0 0 10px 2px rgba(124, 92, 191, 0.1); }
+}
+
+.second-chance-save {
+  animation: secondChanceSave 0.8s ease;
+}
+
+/* ── Spin In ── */
+@keyframes spinIn {
+  from { transform: rotate(-180deg) scale(0); opacity: 0; }
+  to   { transform: rotate(0) scale(1); opacity: 1; }
+}
+
+.spin-in {
+  animation: spinIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Timer Bar Shrink ── */
+.timer-active::after {
+  transition: transform linear;
+  transform: scaleX(0);
+}
+
+/* ── Screen Transitions ── */
+.screen-enter {
+  animation: fadeIn 0.3s ease;
+}
+
+.screen-exit {
+  animation: fadeOut 0.2s ease forwards;
+}
+
+/* ── Splash Text Animations ── */
+.splash-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 5rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: var(--z-modal);
+  opacity: 0;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 40px currentColor;
+  -webkit-text-stroke: 2px rgba(0,0,0,0.5);
+}
+
+.splash-text.animate {
+  animation: splashPopup 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes splashPopup {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

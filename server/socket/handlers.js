@@ -16,12 +16,11 @@ export function registerHandlers(io) {
 
     socket.on('room:create', (data) => {
       const { playerName, settings } = data;
-      const room = roomManager.createRoom(socket.playerId, settings);
+      const room = roomManager.createRoom(socket.playerId, playerName, settings);
 
       socket.playerName = playerName;
       socket.roomCode = room.code;
       socket.join(room.code);
-      room.addPlayer(socket.playerId, playerName);
 
       console.log(`[Room] Created: ${room.code} by ${playerName}`);
 

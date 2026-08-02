@@ -97,9 +97,15 @@ export class GameEngine {
   // ═══════════════════════════════════════════
 
   startGame() {
-    const minPlayers = 3;
-    if (this.players.length < minPlayers) {
-      this.addBots(minPlayers - this.players.length);
+    if (this.settings && this.settings.initialBots !== undefined) {
+      if (this.settings.initialBots > 0) {
+        this.addBots(this.settings.initialBots);
+      }
+    } else {
+      const minPlayers = 3;
+      if (this.players.length < minPlayers) {
+        this.addBots(minPlayers - this.players.length);
+      }
     }
     this.roundNumber = 0;
     this.dealerIndex = 0;

@@ -87,6 +87,9 @@ function bindModals() {
   document.getElementById('create-max').addEventListener('input', (e) => {
     document.getElementById('max-value').textContent = e.target.value;
   });
+  document.getElementById('create-bots').addEventListener('input', (e) => {
+    document.getElementById('bots-value').textContent = e.target.value;
+  });
 
   createForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -101,10 +104,11 @@ function bindModals() {
     );
     const turnTimer = parseInt(document.getElementById('create-timer').value);
     const maxPlayers = parseInt(document.getElementById('create-max').value);
+    const initialBots = parseInt(document.getElementById('create-bots').value);
 
     socketManager.emit('room:create', {
       playerName: name,
-      settings: { targetScore, turnTimer, maxPlayers },
+      settings: { targetScore, turnTimer, maxPlayers, initialBots },
     });
 
     closeModal('modal-create');

@@ -20,6 +20,7 @@ export class Room {
       targetScore: settings.targetScore || 200,
       turnTimer: settings.turnTimer || 30,
       maxPlayers: Math.min(18, Math.max(3, settings.maxPlayers || 8)),
+      initialBots: settings.initialBots !== undefined ? settings.initialBots : 3,
     };
 
     // Players in lobby (before game starts)

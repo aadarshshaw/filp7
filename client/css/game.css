@@ -149,7 +149,7 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: var(--space-lg);
+  gap: var(--space-sm);
   flex-wrap: wrap;
   flex-shrink: 0;
 }
@@ -166,9 +166,7 @@
   align-items: center;
   position: relative;
   
-  /* Elliptical Arc Styles applied via JS inline vars */
-  margin-top: var(--arc-margin, 0px);
-  transform: rotate(var(--arc-angle, 0deg));
+  /* Elliptical Arc Styles removed */
 }
 .opponent-panel.active-turn {
   background: rgba(18, 35, 28, 0.95);
@@ -332,6 +330,7 @@
   justify-content: center;
   gap: 50px;
   padding: var(--space-md) 0;
+  margin-top: var(--space-lg);
   flex-shrink: 0;
 }
 

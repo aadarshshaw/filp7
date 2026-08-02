@@ -281,13 +281,6 @@ function renderOpponents(opponents, currentPlayerId) {
     const panel = document.createElement('div');
     panel.className = 'opponent-panel';
 
-    // Elliptical arc positioning
-    const dist = Math.abs(index - centerIndex);
-    const marginTop = Math.pow(dist, 1.5) * 12; // curve intensity
-    const angle = (centerIndex - index) * 4;    // tilt intensity
-    panel.style.setProperty('--arc-margin', `${marginTop}px`);
-    panel.style.setProperty('--arc-angle', `${angle}deg`);
-
     if (opp.id === currentPlayerId) panel.classList.add('active-turn');
     if (opp.status === 'busted') panel.classList.add('busted');
     if (opp.status === 'stayed') panel.classList.add('stayed');

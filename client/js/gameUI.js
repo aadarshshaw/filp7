@@ -443,6 +443,9 @@ function handleCardDealt(data) {
  */
 function handleBust(data) {
   showToast(`${data.playerName} busted! 💥`, 'error');
+  if (data.playerId === myPlayerId) {
+    showSplash('💥 BUSTED', '#ef4444');
+  }
 
   if (data.playerId === myPlayerId) {
     const handEl = document.getElementById('player-hand');
@@ -465,6 +468,9 @@ function handleStay(data) {
  */
 function handleFlip7(data) {
   showToast(`🎉 ${data.playerName} got Flip 7! +15 bonus!`, 'success');
+  if (data.playerId === myPlayerId) {
+    showSplash('🏆 FLIP 7!', '#f59e0b');
+  }
   createConfetti(80);
 }
 
@@ -475,9 +481,15 @@ function handleActionEvent(data) {
   switch (data.type) {
     case 'action:freeze':
       showToast(`❄️ ${data.drawerName} froze ${data.targetName}!`, 'info');
+      if (data.targetId === myPlayerId) {
+        showSplash('❄️ FROZEN', '#3b82f6');
+      }
       break;
     case 'action:flip_three:start':
       showToast(`🃏 ${data.drawerName} used Flip Three on ${data.targetName}!`, 'info');
+      if (data.targetId === myPlayerId) {
+        showSplash('🃏 FLIP 3', '#f59e0b');
+      }
       break;
     case 'action:second_chance':
       showToast(`🔄 ${data.drawerName} got Second Chance!`, 'info');
@@ -725,6 +737,25 @@ export function showToast(message, type = 'info') {
   setTimeout(() => {
     toast.remove();
   }, 3000);
+}
+
+/**
+ * Show central splash animation text.
+ */
+export function showSplash(text, color) {
+  const splashEl = document.getElementById('game-splash');
+  if (!splashEl) return;
+  
+  // Reset animation
+  splashEl.classList.remove('animate');
+  void splashEl.offsetWidth; // Trigger reflow
+  
+  splashEl.textContent = text;
+  if (color) {
+    splashEl.style.color = color;
+  }
+  
+  splashEl.classList.add('animate');
 }
 
 /**

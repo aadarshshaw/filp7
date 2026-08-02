@@ -246,6 +246,51 @@
   animation: fadeOut 0.2s ease forwards;
 }
 
+/* ── Splash Text Animations ── */
+.splash-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 5rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: var(--z-modal);
+  opacity: 0;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 40px currentColor;
+  -webkit-text-stroke: 2px rgba(0,0,0,0.5);
+}
+
+.splash-text.animate {
+  animation: splashPopup 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes splashPopup {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

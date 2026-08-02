@@ -81,13 +81,17 @@ function bindModals() {
   });
 
   // Range inputs
-  document.getElementById('create-timer').addEventListener('input', (e) => {
+  const updateTimer = (e) => {
     document.getElementById('timer-value').textContent = e.target.value + 's';
-  });
+  };
+  document.getElementById('create-timer').addEventListener('input', updateTimer);
+  document.getElementById('create-timer').addEventListener('change', updateTimer);
 
-  document.getElementById('create-max').addEventListener('input', (e) => {
+  const updateMax = (e) => {
     document.getElementById('max-value').textContent = e.target.value;
-  });
+  };
+  document.getElementById('create-max').addEventListener('input', updateMax);
+  document.getElementById('create-max').addEventListener('change', updateMax);
 
   createForm.addEventListener('submit', (e) => {
     e.preventDefault();

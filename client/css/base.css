@@ -329,6 +329,9 @@ input[type="range"] {
   background: var(--bg-tertiary);
   outline: none;
   cursor: pointer;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;

@@ -192,8 +192,28 @@ function renderMyHand(player) {
   const totalCards = player.hand.length + player.modifiers.length;
   const uniqueCount = player.uniqueNumberCount || 0;
   
-  if (handLabelEl) {
-    handLabelEl.innerHTML = `Your Hand &nbsp;•&nbsp; <span style="color: var(--accent-primary); font-weight:700;">${totalCards} Card${totalCards !== 1 ? 's' : ''}</span> &nbsp;•&nbsp; <span style="color: var(--accent-gold); font-weight:700;">${uniqueCount}/7 Unique for Flip 7</span>`;
+  // Calculate round score
+  const handScore = player.hand.reduce((s, c) => s + c.value, 0);
+  const modScore = player.modifiers.reduce((s, c) => s + (c.value || 0), 0);
+  const totalCurrentScore = handScore + modScore;
+
+  // Update DOM with rolling numbers
+  const totalScoreEl = document.getElementById('status-total-score');
+  const uniqueCountEl = document.getElementById('status-unique-count');
+  const roundScoreEl = document.getElementById('status-round-score');
+
+  if (totalScoreEl && totalScoreEl.innerText !== String(player.totalScore)) {
+    animateValue(totalScoreEl, parseInt(totalScoreEl.innerText) || 0, player.totalScore || 0, 400);
+  } else if (totalScoreEl) {
+    totalScoreEl.innerText = player.totalScore || 0;
+  }
+
+  if (uniqueCountEl) uniqueCountEl.innerText = `${uniqueCount}/7`;
+
+  if (roundScoreEl && roundScoreEl.innerText !== String(totalCurrentScore)) {
+    animateValue(roundScoreEl, parseInt(roundScoreEl.innerText) || 0, totalCurrentScore, 400);
+  } else if (roundScoreEl) {
+    roundScoreEl.innerText = totalCurrentScore;
   }
 
   player.hand.forEach(card => {
@@ -208,15 +228,36 @@ function renderMyHand(player) {
 }
 
 /**
- * Render opponent panels.
+ * Render opponent panels in a circular arc layout.
  */
 function renderOpponents(opponents, currentPlayerId) {
   const area = document.getElementById('opponents-area');
   area.innerHTML = '';
 
+  const totalOpponents = opponents.length;
+  const startAngle = Math.PI * 0.85; // 153 degrees (left)
+  const endAngle = Math.PI * 0.15;   // 27 degrees (right)
+  
+  let angleStep = 0;
+  if (totalOpponents > 1) {
+    angleStep = (startAngle - endAngle) / (totalOpponents - 1);
+  }
+
   opponents.forEach((opp, index) => {
     const panel = document.createElement('div');
     panel.className = 'opponent-panel';
+    
+    // Position circularly
+    const angle = totalOpponents === 1 ? Math.PI / 2 : startAngle - (index * angleStep);
+    const rx = 42; // Horizontal radius %
+    const ry = 38; // Vertical radius %
+    
+    const x = 50 + Math.cos(angle) * rx;
+    const y = 48 - Math.sin(angle) * ry;
+    
+    panel.style.left = `calc(${x}% - 75px)`;
+    panel.style.top = `calc(${y}% - 70px)`;
+
     if (opp.id === currentPlayerId) panel.classList.add('active-turn');
     if (opp.status === 'busted') panel.classList.add('busted');
     if (opp.status === 'stayed') panel.classList.add('stayed');
@@ -228,18 +269,18 @@ function renderOpponents(opponents, currentPlayerId) {
     const cardsCount = opp.hand.length + opp.modifiers.length;
 
     const avatarColor = getPlayerColor(index);
-    let stateIcon = '';
-    if (opp.status === 'busted') stateIcon = '💥';
-    if (opp.status === 'stayed') stateIcon = '🔒';
-    if (opp.isOffline) stateIcon = '🔌';
+    let stateOverlay = '';
+    if (opp.status === 'busted') stateOverlay = '<div class="state-overlay bust-overlay">💥 BUSTED</div>';
+    if (opp.status === 'stayed') stateOverlay = '<div class="state-overlay stay-overlay">✓ STAYED</div>';
+    if (opp.isOffline) stateOverlay = '<div class="state-overlay offline-overlay">🔌 OFFLINE</div>';
 
     panel.innerHTML = `
+      ${stateOverlay}
       <div class="opponent-header">
         <div class="opponent-avatar" style="background: ${avatarColor};" title="${escapeHtml(opp.name)}">
           ${opp.name.slice(0, 2).toUpperCase()}
         </div>
         <span class="opponent-name">${escapeHtml(opp.name)}</span>
-        <span class="opponent-state-icon">${stateIcon}</span>
       </div>
       <div class="opponent-stats-grid">
         <div class="opponent-stat">
@@ -258,7 +299,7 @@ function renderOpponents(opponents, currentPlayerId) {
     
     opp.hand.forEach(card => {
       const cardEl = createCardElement(card, true);
-      cardEl.className = 'card-sm'; // Ensure they get the small card styling
+      cardEl.className = 'card-sm';
       cardsContainer.appendChild(cardEl);
     });
 
@@ -343,7 +384,7 @@ function updateTurnIndicator(state) {
   }
 
   if (state.currentPlayerId === myPlayerId) {
-    turnText.textContent = '★ YOUR TURN ★';
+    turnText.innerHTML = '★ YOUR TURN ★<br><span style="font-size:0.8rem; opacity:0.8; font-weight:500;">What do you do?</span>';
     turnText.className = 'turn-text your-turn';
   } else {
     const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
@@ -566,12 +607,25 @@ function startTurnTimer(duration) {
   if (countEl) {
     countEl.style.display = 'inline-block';
     countEl.textContent = ` • ${duration}s`;
+    countEl.style.color = 'var(--accent-primary)';
+    countEl.classList.remove('pulse-text');
   }
 
   let remaining = duration;
   timerInterval = setInterval(() => {
     remaining--;
-    if (countEl) countEl.textContent = ` • ${remaining}s`;
+    if (countEl) {
+      countEl.textContent = ` • ${remaining}s`;
+      if (remaining <= 5) {
+        countEl.style.color = 'var(--accent-danger)';
+        countEl.classList.add('pulse-text');
+      } else if (remaining <= 10) {
+        countEl.style.color = 'var(--accent-gold)';
+        countEl.classList.remove('pulse-text');
+      } else {
+        countEl.style.color = 'var(--accent-primary)';
+      }
+    }
     if (remaining <= 0) {
       clearTurnTimer();
     }
@@ -590,7 +644,26 @@ function clearTurnTimer() {
   if (bar) bar.classList.remove('timer-active');
   
   const countEl = document.getElementById('turn-timer-count');
-  if (countEl) countEl.style.display = 'none';
+  if (countEl) {
+    countEl.style.display = 'none';
+    countEl.classList.remove('pulse-text');
+  }
+}
+
+/**
+ * Animate a number counting up.
+ */
+export function animateValue(obj, start, end, duration) {
+  let startTimestamp = null;
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    obj.innerHTML = Math.floor(progress * (end - start) + start);
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    }
+  };
+  window.requestAnimationFrame(step);
 }
 
 /**

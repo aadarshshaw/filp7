@@ -236,10 +236,16 @@ function getInitials(name) {
 }
 
 export function animateCardDeal(cardEl) {
-  cardEl.classList.add('card-deal-in');
+  cardEl.classList.add('card-flip-reveal');
   cardEl.addEventListener('animationend', () => {
-    cardEl.classList.remove('card-deal-in');
+    cardEl.classList.remove('card-flip-reveal');
   }, { once: true });
+  
+  const deck = document.getElementById('deck-pile');
+  if (deck) {
+    deck.classList.add('deck-shake');
+    setTimeout(() => deck.classList.remove('deck-shake'), 400);
+  }
 }
 
 export function animateBust(container) {

@@ -120,9 +120,15 @@ export class Deck {
     this.discardPile = [];
   }
 
-  /** Draw the top card. Returns null if deck is empty. */
+  /** Draw the top card. Reshuffles discard pile if empty. Returns null if both are empty. */
   draw() {
-    if (this.cards.length === 0) return null;
+    if (this.cards.length === 0) {
+      if (this.discardPile.length === 0) return null;
+      // Reshuffle discard pile to form new draw pile
+      this.cards = [...this.discardPile];
+      shuffle(this.cards);
+      this.discardPile = [];
+    }
     return this.cards.pop();
   }
 

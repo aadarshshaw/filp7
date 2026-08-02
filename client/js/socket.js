@@ -10,10 +10,28 @@ class SocketManager {
     this.connectionCallbacks = [];
     
     // Generate or retrieve persistent playerId
-    this.playerId = localStorage.getItem('flip7_playerId');
+    try {
+      this.playerId = localStorage.getItem('flip7_playerId');
+    } catch (e) {
+      console.warn('localStorage not available');
+    }
+    
     if (!this.playerId) {
-      this.playerId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2);
-      localStorage.setItem('flip7_playerId', this.playerId);
+      try {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+          this.playerId = crypto.randomUUID();
+        }
+      } catch (e) {
+        console.warn('crypto.randomUUID failed', e);
+      }
+      
+      if (!this.playerId) {
+        this.playerId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+      }
+      
+      try {
+        localStorage.setItem('flip7_playerId', this.playerId);
+      } catch (e) {}
     }
   }
 

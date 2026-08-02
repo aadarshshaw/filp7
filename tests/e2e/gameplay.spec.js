@@ -37,11 +37,19 @@ test('basic gameplay loop', async ({ browser }) => {
   await expect(page1.locator('#game-screen')).toBeVisible();
   await expect(page2.locator('#game-screen')).toBeVisible();
 
-  // Verify action buttons appear for someone
-  // (We don't know who is current player due to random dealer, but one of them has to have buttons)
-  const p1HasButtons = await page1.locator('#action-buttons').isVisible();
-  const p2HasButtons = await page2.locator('#action-buttons').isVisible();
-  
+  // Wait for action buttons to be visible on either player's screen
+  // (We don't know who is current player due to random dealer)
+  let p1HasButtons = false;
+  let p2HasButtons = false;
+
+  try {
+    await page1.locator('#action-buttons').waitFor({ state: 'visible', timeout: 5000 });
+    p1HasButtons = true;
+  } catch (e) {
+    await page2.locator('#action-buttons').waitFor({ state: 'visible', timeout: 5000 });
+    p2HasButtons = true;
+  }
+
   expect(p1HasButtons || p2HasButtons).toBe(true);
 
   const activePage = p1HasButtons ? page1 : page2;

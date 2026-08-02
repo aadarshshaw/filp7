@@ -67,7 +67,12 @@ export class GameEngine {
         this.postTurnCheck();
       }
     } else {
+      if (player.hand) player.hand.forEach(c => this.deck.discard(c));
+      if (player.modifiers) player.modifiers.forEach(c => this.deck.discard(c));
       this.players.splice(idx, 1);
+      if (this.dealerIndex >= idx && this.dealerIndex > 0) {
+        this.dealerIndex--;
+      }
       this.bots.delete(id);
     }
   }
@@ -106,10 +111,11 @@ export class GameEngine {
     this.clearRoundEndTimer();
     this.clearTurnTimer();
     this.roundNumber++;
-    this.deck.reset();
 
-    // Reset ALL players for the new round
+    // Reset ALL players for the new round, but discard their cards first
     for (const p of this.players) {
+      if (p.hand) p.hand.forEach(c => this.deck.discard(c));
+      if (p.modifiers) p.modifiers.forEach(c => this.deck.discard(c));
       p.resetRound();
     }
 

@@ -42,4 +42,26 @@ describe('GameEngine', () => {
     expect(stayResult).toBeDefined();
     expect(cp.hasStayed).toBe(true);
   });
+
+  test('should persist deck across rounds and discard played cards', () => {
+    engine.addPlayer('p1', 'Player 1');
+    engine.addPlayer('p2', 'Player 2');
+    
+    // First round
+    engine.startNewRound();
+    const deckRemainingRound1 = engine.deck.remaining;
+    expect(deckRemainingRound1).toBeLessThan(100);
+    
+    // Simulate end of round manually by calling startNewRound again
+    // (This triggers the card collection logic in GameEngine)
+    engine.startNewRound();
+    
+    // The deck should NOT reset to 100
+    // It should be deckRemainingRound1 - 2 (since 2 cards were dealt for round 2)
+    const deckRemainingRound2 = engine.deck.remaining;
+    expect(deckRemainingRound2).toBe(deckRemainingRound1 - 2);
+    
+    // Discard pile should now contain the 2 cards from round 1
+    expect(engine.deck.discardPile.length).toBe(2);
+  });
 });

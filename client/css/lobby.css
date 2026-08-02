@@ -323,7 +323,6 @@
   background: rgba(18, 38, 29, 0.8);
   display: flex;
   flex-direction: column;
-  max-height: 480px;
 }
 .lobby-chat h3 {
   margin-bottom: var(--space-md);

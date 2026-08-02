@@ -218,17 +218,19 @@
           </div>
 
           <div class="player-list-container glass-panel">
-            <h3>Players <span class="player-count" id="lobby-player-count">0/8</span></h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+              <h3 style="margin: 0;">Players <span class="player-count" id="lobby-player-count">0/8</span></h3>
+              <div id="bot-controls" style="display: none; gap: var(--space-sm);">
+                <button id="btn-remove-bot" class="btn btn-secondary btn-sm">- Bot</button>
+                <button id="btn-add-bot" class="btn btn-secondary btn-sm">+ Bot</button>
+              </div>
+            </div>
             <ul class="player-list" id="lobby-player-list">
               <!-- dynamically populated -->
             </ul>
           </div>
 
           <div class="lobby-actions" id="lobby-actions">
-            <div id="bot-controls" style="display: none; justify-content: center; gap: var(--space-sm); margin-bottom: var(--space-md);">
-              <button id="btn-remove-bot" class="btn btn-secondary btn-sm">- Bot</button>
-              <button id="btn-add-bot" class="btn btn-secondary btn-sm">+ Bot</button>
-            </div>
             <button id="btn-start-game" class="btn btn-primary btn-glow btn-full" disabled>
               Waiting for players...
             </button>

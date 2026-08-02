@@ -216,7 +216,37 @@ function renderMyHand(player) {
     roundScoreEl.innerText = totalCurrentScore;
   }
 
-  // Create hand cards
+  // Add state overlays to my panel
+  const myPanel = document.getElementById('my-player-panel');
+  if (myPanel) {
+    // Remove old overlays/classes
+    myPanel.classList.remove('busted', 'stayed');
+    const oldOverlay = myPanel.querySelector('.state-overlay');
+    if (oldOverlay) oldOverlay.remove();
+
+    if (player.status === 'busted') {
+      myPanel.classList.add('busted');
+      const overlay = document.createElement('div');
+      overlay.className = 'state-overlay bust-overlay';
+      overlay.textContent = '💥 BUSTED';
+      myPanel.appendChild(overlay);
+    } else if (player.status === 'stayed') {
+      myPanel.classList.add('stayed');
+      const overlay = document.createElement('div');
+      overlay.className = 'state-overlay stay-overlay';
+      overlay.textContent = '✓ STAYED';
+      myPanel.appendChild(overlay);
+    } else if (player.isFrozen) {
+      const overlay = document.createElement('div');
+      overlay.className = 'state-overlay';
+      overlay.style.color = '#3b82f6';
+      overlay.style.borderColor = '#3b82f6';
+      overlay.textContent = '❄️ FROZEN';
+      myPanel.appendChild(overlay);
+    }
+  }
+
+  // Apply fan rotation to cards
   player.hand.forEach(card => {
     const cardEl = createCardElement(card, false);
     handEl.appendChild(cardEl);
@@ -263,8 +293,9 @@ function renderOpponents(opponents, currentPlayerId) {
     const avatarColor = getPlayerColor(index);
     let stateOverlay = '';
     if (opp.status === 'busted') stateOverlay = '<div class="state-overlay bust-overlay">💥 BUSTED</div>';
-    if (opp.status === 'stayed') stateOverlay = '<div class="state-overlay stay-overlay">✓ STAYED</div>';
-    if (opp.isOffline) stateOverlay = '<div class="state-overlay offline-overlay">🔌 OFFLINE</div>';
+    else if (opp.status === 'stayed') stateOverlay = '<div class="state-overlay stay-overlay">✓ STAYED</div>';
+    else if (opp.isFrozen) stateOverlay = '<div class="state-overlay" style="color:#3b82f6; border-color:#3b82f6;">❄️ FROZEN</div>';
+    else if (opp.isOffline) stateOverlay = '<div class="state-overlay offline-overlay">🔌 OFFLINE</div>';
 
     panel.innerHTML = `
       ${stateOverlay}
@@ -346,9 +377,6 @@ function updateStatusBar(player) {
   const elUnique = document.getElementById('status-unique-count');
   const elTotal = document.getElementById('status-total-score');
   
-  if (elRoundScore) {
-    elRoundScore.textContent = player.roundScore || 0;
-  }
   if (elUnique) {
     elUnique.textContent = `${player.uniqueNumberCount || 0}/7`;
   }
@@ -646,16 +674,21 @@ function clearTurnTimer() {
  * Animate a number counting up.
  */
 export function animateValue(obj, start, end, duration) {
+  if (obj.dataset.animId) {
+    window.cancelAnimationFrame(parseInt(obj.dataset.animId));
+  }
   let startTimestamp = null;
   const step = (timestamp) => {
     if (!startTimestamp) startTimestamp = timestamp;
     const progress = Math.min((timestamp - startTimestamp) / duration, 1);
     obj.innerHTML = Math.floor(progress * (end - start) + start);
     if (progress < 1) {
-      window.requestAnimationFrame(step);
+      obj.dataset.animId = window.requestAnimationFrame(step);
+    } else {
+      delete obj.dataset.animId;
     }
   };
-  window.requestAnimationFrame(step);
+  obj.dataset.animId = window.requestAnimationFrame(step);
 }
 
 /**

@@ -331,7 +331,7 @@
           </div>
 
           <!-- Unified Player Card Panel -->
-          <div class="player-card-panel">
+          <div class="player-card-panel" id="my-player-panel">
             <div class="hand-row">
               <div class="player-hand" id="player-hand">
                 <!-- dynamically populated -->
@@ -365,45 +365,46 @@
       
     </div>
 
-    <!-- Action Card Target Modal -->
-    <div class="modal-overlay" id="modal-action-target" style="display: none;">
-      <div class="modal glass-panel">
-        <h2 class="modal-title" id="action-target-title">Choose a Target</h2>
-        <p class="action-card-desc" id="action-card-desc"></p>
-        <div class="target-list" id="target-list">
-          <!-- dynamically populated -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Round End Overlay -->
-    <div class="overlay" id="round-end-overlay" style="display: none;">
-      <div class="overlay-content glass-panel">
-        <h2 class="overlay-title">Round Complete!</h2>
-        <div class="round-scores" id="round-scores">
-          <!-- dynamically populated -->
-        </div>
-        <p class="next-round-timer">Next round starting...</p>
-      </div>
-    </div>
-
-    <!-- Game Over Overlay -->
-    <div class="overlay" id="game-over-overlay" style="display: none;">
-      <div class="overlay-content glass-panel game-over-content">
-        <div class="winner-celebration" id="winner-celebration">
-          <h2 class="overlay-title">🏆 Game Over! 🏆</h2>
-          <div class="winner-name" id="winner-name">Winner</div>
-        </div>
-        <div class="final-scores" id="final-scores">
-          <!-- dynamically populated -->
-        </div>
-        <div class="game-over-actions">
-          <button id="btn-play-again" class="btn btn-primary btn-glow">Play Again</button>
-          <button id="btn-back-lobby" class="btn btn-secondary">Back to Lobby</button>
-        </div>
-      </div>
-    </div>
   </section>
+
+  <!-- Action Card Target Modal -->
+  <div class="modal-overlay" id="modal-action-target" style="display: none; z-index: 9999;">
+    <div class="modal glass-panel">
+      <h2 class="modal-title" id="action-target-title">Choose a Target</h2>
+      <p class="action-card-desc" id="action-card-desc"></p>
+      <div class="target-list" id="target-list">
+        <!-- dynamically populated -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Round End Overlay -->
+  <div class="overlay" id="round-end-overlay" style="display: none; z-index: 9999;">
+    <div class="overlay-content glass-panel">
+      <h2 class="overlay-title">Round Complete!</h2>
+      <div class="round-scores" id="round-scores">
+        <!-- dynamically populated -->
+      </div>
+      <p class="next-round-timer">Next round starting...</p>
+    </div>
+  </div>
+
+  <!-- Game Over Overlay -->
+  <div class="overlay" id="game-over-overlay" style="display: none; z-index: 9999;">
+    <div class="overlay-content glass-panel game-over-content">
+      <div class="winner-celebration" id="winner-celebration">
+        <h2 class="overlay-title">🏆 Game Over! 🏆</h2>
+        <div class="winner-name" id="winner-name">Winner</div>
+      </div>
+      <div class="final-scores" id="final-scores">
+        <!-- dynamically populated -->
+      </div>
+      <div class="game-over-actions">
+        <button id="btn-play-again" class="btn btn-primary btn-glow">Play Again</button>
+        <button id="btn-back-lobby" class="btn btn-secondary">Back to Lobby</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Notifications -->
   <div class="toast-container" id="toast-container"></div>

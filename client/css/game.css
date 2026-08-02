@@ -294,12 +294,21 @@
   z-index: 2;
 }
 .card-sm {
+  position: relative;
   width: 40px;
   height: 56px;
   margin-left: -25px;
   border-radius: 4px;
   box-shadow: -4px 4px 10px rgba(0,0,0,0.6);
   z-index: 3;
+  transition: transform 0.2s ease, z-index 0.2s ease, box-shadow 0.2s ease;
+  transform-origin: bottom center;
+  cursor: pointer;
+}
+.card-sm:hover {
+  transform: scale(2.5) translateY(-10px);
+  z-index: 50;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.8);
 }
 .card-sm:first-child {
   margin-left: 0;

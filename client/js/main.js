@@ -224,7 +224,7 @@ function updatePlayerList(players) {
       li.appendChild(badge);
     }
 
-    if (p.id === socketManager.id) {
+    if (p.id === socketManager.playerId) {
       const badge = document.createElement('span');
       badge.className = 'player-badge badge-you';
       badge.textContent = 'You';
@@ -245,7 +245,7 @@ function updatePlayerList(players) {
 
 function updateStartButton(room) {
   const btn = document.getElementById('btn-start-game');
-  const isHost = room.hostId === socketManager.id;
+  const isHost = room.hostId === socketManager.playerId;
   const hasPlayers = room.players.length >= 1; // bots fill to 3
 
   if (!isHost) {
@@ -331,7 +331,7 @@ function bindSocketEvents() {
       currentRoom.hostId = data.hostId;
       updateStartButton(currentRoom);
     }
-    if (data.hostId === socketManager.id) {
+    if (data.hostId === socketManager.playerId) {
       showToast('You are now the host! 👑', 'info');
     }
   });

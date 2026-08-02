@@ -16,7 +16,7 @@ let timerDuration = 30;
  * Initialize the Game UI module.
  */
 export function initGameUI() {
-  myPlayerId = socketManager.id;
+  myPlayerId = socketManager.playerId;
   initAudio();
 
   // Button handlers
@@ -47,7 +47,7 @@ export function initGameUI() {
 
   // Socket events
   socketManager.on('game:started', (state) => {
-    myPlayerId = socketManager.id;
+    myPlayerId = socketManager.playerId;
     soundShuffle();
     showScreen('game-screen');
     renderState(state);
@@ -59,7 +59,7 @@ export function initGameUI() {
 
   socketManager.on('game:turn', (data) => {
     handleTurn(data);
-    if (data.playerId === socketManager.id) {
+    if (data.playerId === socketManager.playerId) {
       soundYourTurn();
     }
   });
@@ -136,7 +136,7 @@ export function initGameUI() {
  */
 function renderState(state) {
   currentState = state;
-  myPlayerId = socketManager.id;
+  myPlayerId = socketManager.playerId;
 
   // Ensure overlays are hidden during active gameplay
   if (state.phase === 'playing' || state.phase === 'dealing') {

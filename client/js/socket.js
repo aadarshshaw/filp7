@@ -12,7 +12,7 @@ class SocketManager {
     // Generate or retrieve persistent playerId
     this.playerId = localStorage.getItem('flip7_playerId');
     if (!this.playerId) {
-      this.playerId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2);
+      this.playerId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2);
       localStorage.setItem('flip7_playerId', this.playerId);
     }
   }

@@ -261,17 +261,17 @@
     <div class="game-container">
       <!-- Top Bar: Single line banner -->
       <div class="game-topbar">
-        <div class="game-round-info">
+        <div class="game-round-info topbar-section">
           <span class="round-label">Round</span>
           <span class="round-number" id="game-round-number">1</span>
         </div>
-        <div class="game-target-info">
+        <div class="game-target-info topbar-section">
           Target <span class="highlight-number" id="game-target-score">200</span>
         </div>
-        <div class="deck-info">
+        <div class="deck-info topbar-section">
           Deck <span class="highlight-number" id="game-deck-remaining">94</span>
         </div>
-        <button id="btn-toggle-scoreboard" class="btn btn-ghost btn-sm" title="Scoreboard">🏆</button>
+        <button id="btn-toggle-scoreboard" class="btn btn-ghost btn-sm topbar-btn" title="Scoreboard">🏆</button>
       </div>
 
       <!-- Scoreboard Sidebar -->
@@ -325,8 +325,10 @@
           <!-- Action Buttons & Turn Indicator -->
           <div class="action-bar" id="action-bar">
             <div class="turn-indicator" id="turn-indicator">
-              <span class="turn-text" id="turn-text">Waiting...</span>
-              <span class="turn-timer-count" id="turn-timer-count" style="display:none;"></span>
+              <div class="turn-indicator-compact">
+                <span class="turn-text" id="turn-text">Waiting...</span>
+                <span class="turn-timer-count" id="turn-timer-count" style="display:none;"></span>
+              </div>
               <div class="turn-timer-bar" id="turn-timer-bar"></div>
             </div>
             <div class="action-buttons" id="action-buttons" style="visibility: hidden;">

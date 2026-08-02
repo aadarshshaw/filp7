@@ -343,6 +343,18 @@ function renderOpponents(opponents, currentPlayerId) {
       cardEl.className = 'card-sm';
       cardsContainer.appendChild(cardEl);
     });
+    
+    // Apply fan rotation to opponent cards
+    const cards = cardsContainer.querySelectorAll('.card-sm');
+    const numOppCards = cards.length;
+    if (numOppCards > 1) {
+      const maxAngle = Math.min(numOppCards * 3, 20); // 3 degrees per card, max 20
+      cards.forEach((cardEl, i) => {
+        const angle = -maxAngle / 2 + (maxAngle / (numOppCards - 1)) * i;
+        cardEl.style.transform = `rotate(${angle}deg)`;
+        cardEl.dataset.baseAngle = angle; // store it so hover can override and restore
+      });
+    }
 
     area.appendChild(panel);
   });
@@ -353,8 +365,15 @@ function renderOpponents(opponents, currentPlayerId) {
  */
 function renderScoreboard(players, targetScore) {
   const list = document.getElementById('scoreboard-list');
-  list.innerHTML = '';
+  
+  // First (F) - Read initial bounding rects
+  const oldRects = new Map();
+  Array.from(list.children).forEach(el => {
+    const playerId = el.dataset.playerId;
+    if (playerId) oldRects.set(playerId, el.getBoundingClientRect());
+  });
 
+  list.innerHTML = '';
   const sorted = [...players].sort((a, b) => b.totalScore - a.totalScore);
 
   sorted.forEach((p, i) => {
@@ -363,11 +382,21 @@ function renderScoreboard(players, targetScore) {
 
     const entry = document.createElement('div');
     entry.className = 'scoreboard-entry';
+    entry.dataset.playerId = p.id;
+    
+    // Add state classes
+    if (p.id === currentState.currentPlayerId) entry.classList.add('is-active');
+    if (p.status === 'busted') entry.classList.add('is-busted');
+
+    let stateBadge = '';
+    if (p.status === 'stayed') stateBadge = '<span style="color:var(--accent-gold); font-size: 0.75rem;"> [STAY]</span>';
+    else if (p.status === 'busted') stateBadge = '<span style="color:var(--accent-danger); font-size: 0.75rem;"> [BUST]</span>';
+
     entry.innerHTML = `
       <span class="scoreboard-rank ${i === 0 ? 'first' : ''}">${i === 0 ? '👑' : i + 1}</span>
       <div style="flex:1;">
         <div class="scoreboard-entry-name" style="${isMe ? 'color: var(--accent-primary);' : ''}">
-          ${escapeHtml(p.name)}${isMe ? ' (You)' : ''}${p.isBot ? ' 🤖' : ''}
+          ${escapeHtml(p.name)}${isMe ? ' (You)' : ''}${p.isBot ? ' 🤖' : ''}${stateBadge}
         </div>
         <div class="scoreboard-bar">
           <div class="scoreboard-bar-fill" style="width: ${percent}%"></div>
@@ -376,6 +405,26 @@ function renderScoreboard(players, targetScore) {
       <span class="scoreboard-entry-score">${p.totalScore}</span>
     `;
     list.appendChild(entry);
+  });
+
+  // Last, Invert, Play (L I P)
+  Array.from(list.children).forEach(el => {
+    const playerId = el.dataset.playerId;
+    if (playerId && oldRects.has(playerId)) {
+      const oldRect = oldRects.get(playerId);
+      const newRect = el.getBoundingClientRect();
+      const deltaY = oldRect.top - newRect.top;
+      
+      if (deltaY !== 0) {
+        el.style.transform = `translateY(${deltaY}px)`;
+        el.style.transition = 'none';
+        
+        requestAnimationFrame(() => {
+          el.style.transform = '';
+          el.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, opacity 0.3s ease';
+        });
+      }
+    }
   });
 }
 
@@ -415,13 +464,17 @@ function updateTurnIndicator(state) {
     return;
   }
 
+  const myPanel = document.getElementById('my-player-panel');
+
   if (state.currentPlayerId === myPlayerId) {
     turnText.textContent = '★ YOUR TURN ★';
     turnText.className = 'turn-text your-turn';
+    if (myPanel) myPanel.classList.add('active-turn');
   } else {
     const currentPlayer = state.players.find(p => p.id === state.currentPlayerId);
     turnText.textContent = `${currentPlayer?.name || 'Someone'}'s turn...`;
     turnText.className = 'turn-text';
+    if (myPanel) myPanel.classList.remove('active-turn');
   }
 }
 
@@ -659,24 +712,25 @@ function startTurnTimer(duration) {
   const countEl = document.getElementById('turn-timer-count');
   if (countEl) {
     countEl.style.display = 'inline-block';
-    countEl.textContent = ` • ${duration}s`;
-    countEl.style.color = 'var(--accent-primary)';
+    countEl.textContent = `${duration}s`;
     countEl.classList.remove('pulse-text');
+    countEl.style.color = `hsl(120, 80%, 50%)`;
   }
 
   let remaining = duration;
   timerInterval = setInterval(() => {
     remaining--;
     if (countEl) {
-      countEl.textContent = ` • ${remaining}s`;
+      countEl.textContent = `${remaining}s`;
+      
+      // HSL: Green(120) to Red(0)
+      const hue = Math.max(0, Math.min(120, (remaining / timerDuration) * 120));
+      countEl.style.color = `hsl(${hue}, 80%, 50%)`;
+
       if (remaining <= 5) {
-        countEl.style.color = 'var(--accent-danger)';
         countEl.classList.add('pulse-text');
-      } else if (remaining <= 10) {
-        countEl.style.color = 'var(--accent-gold)';
-        countEl.classList.remove('pulse-text');
       } else {
-        countEl.style.color = 'var(--accent-primary)';
+        countEl.classList.remove('pulse-text');
       }
     }
     if (remaining <= 0) {
@@ -758,9 +812,10 @@ export function showToast(message, type = 'info') {
   toast.textContent = message;
   container.appendChild(toast);
 
+  // 3.4s matches the CSS animation: 3s delay + 0.4s slide out
   setTimeout(() => {
     toast.remove();
-  }, 3000);
+  }, 3400);
 }
 
 /**

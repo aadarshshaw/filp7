@@ -101,8 +101,8 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse at 50% 40%, rgba(20, 50, 38, 0.6) 0%, rgba(12, 25, 20, 0.95) 75%),
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.008) 0px, rgba(255, 255, 255, 0.008) 2px, transparent 2px, transparent 8px);
+    radial-gradient(ellipse at 50% 40%, rgba(20, 50, 38, 0.4) 0%, rgba(12, 25, 20, 0.95) 70%, rgba(4, 12, 8, 1) 100%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 2px, transparent 2px, transparent 8px);
   pointer-events: none;
   z-index: 0;
 }
@@ -430,9 +430,17 @@ label {
   border-radius: var(--radius-md);
   font-size: 0.9rem;
   font-weight: 600;
-  animation: toast-in 0.3s ease, toast-out 0.3s ease 2.7s forwards;
+  animation: toast-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, toast-out 0.4s ease 3s forwards;
   max-width: 360px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+@keyframes toast-in {
+  from { transform: translateX(120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes toast-out {
+  from { transform: translateX(0); opacity: 1; margin-top: 0; }
+  to { transform: translateX(120%); opacity: 0; margin-top: -50px; }
 }
 .toast-error {
   background: #7f1d1d;

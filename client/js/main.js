@@ -84,6 +84,7 @@ function bindModals() {
   document.getElementById('create-timer').addEventListener('input', (e) => {
     document.getElementById('timer-value').textContent = e.target.value + 's';
   });
+
   document.getElementById('create-max').addEventListener('input', (e) => {
     document.getElementById('max-value').textContent = e.target.value;
   });
